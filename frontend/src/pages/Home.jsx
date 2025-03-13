@@ -1,17 +1,18 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  box-sizing: border-box;
-  width: 100%;
-  overflow-x: hidden;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  background-color: #f9f9f9;
+  height: 100vh;
 `;
 
 const Title = styled.h2`
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #333;
   margin-bottom: 1rem;
 `;
@@ -19,15 +20,14 @@ const Title = styled.h2`
 const Description = styled.p`
   font-size: 1.2rem;
   color: #555;
-  text-align: center;
   max-width: 600px;
   margin-bottom: 2rem;
 `;
 
 const CallToAction = styled.button`
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   font-size: 1rem;
-  color: #fff;
+  color: white;
   background-color: #007bff;
   border: none;
   border-radius: 5px;
@@ -43,9 +43,7 @@ const Home = () => (
   <HomeContainer>
     <Title>Bienvenido a Gestión de Inventario</Title>
     <Description>
-      Optimiza y gestiona eficientemente el inventario de tu negocio con nuestra
-      aplicación profesional, robusta y escalable. ¡Empieza hoy mismo y lleva tu
-      empresa al siguiente nivel!
+      Controla eficientemente el inventario de tu negocio con nuestra aplicación profesional.
     </Description>
     <CallToAction>Comienza Ahora</CallToAction>
   </HomeContainer>

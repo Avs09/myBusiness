@@ -42,7 +42,7 @@ const MenuLink = styled(Link)`
 
 const Header = () => (
   <Nav>
-    <Logo>Gestión de Inventario</Logo>
+    <Logo>My Business</Logo>
     <Menu>
       <MenuItem>
         <MenuLink to="/">Inicio</MenuLink>
