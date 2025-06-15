@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: system-ui, sans-serif;
+}
+
+
+.form-feedback {
+  @apply text-xs leading-tight font-medium; /* tamaño, interlineado y tipografía uniforme */
+}
+.form-feedback--error {
+  @apply text-red-600;
+}
+.form-feedback--hint {
+  @apply text-gray-500;
+}
+.form-feedback--success {
+  @apply text-green-600;
+}

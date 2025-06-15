@@ -1,0 +1,95 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.myBusiness'
+version = '0.0.1-SNAPSHOT'
+
+
+
+
+repositories {
+    mavenCentral()
+}
+
+// forzar una versión compatible de xmlbeans para todo el grafo de dependencias
+configurations.all {
+    resolutionStrategy {
+        // Aquí forzamos la versión 5.1.1 de xmlbeans, que es la que usa POI 5.2.3
+        force 'org.apache.xmlbeans:xmlbeans:5.1.1'
+    }
+}
+
+
+dependencies {
+
+implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+
+    // --- Core Spring Boot ---
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // --- Apache POI (Excel) ---
+    implementation 'org.apache.poi:poi:5.2.3'
+implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    
+
+    // --- CSV ---
+    implementation 'org.apache.commons:commons-csv:1.10.0'
+
+    // --- PDF (iText) ---
+    implementation 'com.itextpdf:itext7-core:7.2.5'
+
+    // --- JWT (JSON Web Tokens) ---
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // --- Lombok ---
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+    testImplementation 'org.projectlombok:lombok:1.18.38'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+
+    // --- Database ---
+    implementation 'org.postgresql:postgresql:42.5.0'
+    testImplementation 'com.h2database:h2'
+
+    // --- OpenAPI (Swagger) ---
+    implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
+    // --- DevTools ---
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // --- Testing ---
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // --- Jakarta APIs ---
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+    implementation 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    
+    // --- JAXB (Java XML Binding) --
+     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.3'
+    implementation 'org.glassfish.jaxb:jaxb-core:4.0.3'
+    
+   
+	runtimeOnly 'com.h2database:h2'
+    
+}
+
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
