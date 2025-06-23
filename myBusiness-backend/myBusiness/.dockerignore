@@ -1,0 +1,7 @@
+target/
+build/
+*.log
+*.tmp
+.idea/
+.vscode/
+.git

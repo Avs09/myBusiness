@@ -1,4 +1,3 @@
-// src/main/java/com/myBusiness/application/usecase/RegisterUserUseCase.java
 package com.myBusiness.application.usecase;
 
 import com.myBusiness.application.dto.UserRegisterDto;
@@ -19,24 +18,22 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class RegisterUserUseCase {
 
-    private final UserRepository userRepo;                     
+    private final UserRepository userRepo;
     private final VerificationTokenRepository tokenRepo;
     private final BCryptPasswordEncoder passwordEncoder;
 
     /**
-     * 1) Verifica si ese email ya existe en la tabla 'users'. Si existe, arroja InvalidUserException YA.
-     * 2) Si no existe en users, revisa si hay un token pendiente (used=false) para ese mismo correo.
-     *    Si hay uno, arroja InvalidUserException("Ya hay un registro pendiente para ese email.").
+     * 1) Verifica si ese email ya existe o tiene un token pendiente.
+     * 100% dentro de una transacción para consistencia.
      */
+    @Transactional
     public void checkIfEmailPending(String email) {
         String normalized = email.trim().toLowerCase();
 
-        // 1.1) Comprueba en la tabla users:
         if (userRepo.findByEmail(normalized).isPresent()) {
             throw new InvalidUserException("Email ya registrado: " + normalized);
         }
 
-        // 1.2) Comprueba si hay token pendiente para ese mismo correo:
         boolean existsTokenPendiente = tokenRepo
             .findByPendingEmailAndUsedFalse(normalized)
             .isPresent();
@@ -47,13 +44,12 @@ public class RegisterUserUseCase {
     }
 
     /**
-     * 2) Crea un nuevo token con nombre, email y contraseña (hasheada) pendientes. NO guarda usuario.
+     * 2) Crea un nuevo token con los datos “pendientes”.
      */
     @Transactional
     public String createPendingUser(UserRegisterDto dto) {
         String normalizedEmail = dto.getEmail().trim().toLowerCase();
 
-        // Generar código alfanumérico de 8 caracteres
         String code = generateRandomCode();
 
         VerificationToken vt = VerificationToken.builder()
@@ -72,7 +68,6 @@ public class RegisterUserUseCase {
     private String generateRandomCode() {
         byte[] random = new byte[24];
         new SecureRandom().nextBytes(random);
-        // Base64 URL-safe (sin “+”, “/”, ni “=”), y tomamos los primeros 8 caracteres
         return Base64.getUrlEncoder()
                      .withoutPadding()
                      .encodeToString(random)

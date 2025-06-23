@@ -12,14 +12,13 @@ export default function RecentMovementsTable() {
 
   useEffect(() => {
     const headers = getAuthHeader() as Record<string, string>
-    fetchRecentMovements(10, headers)
+    fetchRecentMovements(10)
       .then((data) => setMovements(data))
       .catch((err: any) => {
         console.error('Error cargando movimientos recientes:', err)
         toast.error(err.response?.data?.message || 'No se pudieron cargar movimientos.')
       })
       .finally(() => setLoading(false))
-
   }, [])
 
   if (loading) {
@@ -34,28 +33,28 @@ export default function RecentMovementsTable() {
       <div className="overflow-x-auto mt-4">
         <table className="w-full bg-white shadow rounded-lg overflow-hidden border-collapse">
           <thead className="bg-blue-100">
-            <tr>
-              <th className="p-2 border text-left">ID</th>
-              <th className="p-2 border text-left">Producto</th> {/* cambiado */}
-              <th className="p-2 border text-left">Tipo</th>
-              <th className="p-2 border text-left">Cantidad</th>
-              <th className="p-2 border text-left">Motivo</th>
-              <th className="p-2 border text-left">Fecha</th>
-              <th className="p-2 border text-left">Usuario</th>
+            <tr>{/* evita whitespace */}
+              {/* */}<th className="p-2 border text-left">ID</th>{/* */}
+              <th className="p-2 border text-left">Producto</th>{/* */}
+              <th className="p-2 border text-left">Tipo</th>{/* */}
+              <th className="p-2 border text-left">Cantidad</th>{/* */}
+              <th className="p-2 border text-left">Motivo</th>{/* */}
+              <th className="p-2 border text-left">Fecha</th>{/* */}
+              <th className="p-2 border text-left">Usuario</th>{/* */}
             </tr>
           </thead>
           <tbody>
             {movements.map((m) => (
-              <tr key={m.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{m.id}</td>
-                <td className="p-2 border">{m.productName}</td> {/* usa nombre */}
-                <td className="p-2 border">{m.movementType}</td>
-                <td className="p-2 border">{m.quantity}</td>
-                <td className="p-2 border">{m.reason}</td>
+              <tr key={m.id} className="hover:bg-gray-50">{/* evita whitespace */}
+                {/* */}<td className="p-2 border">{m.id}</td>{/* */}
+                <td className="p-2 border">{m.productName}</td>{/* */}
+                <td className="p-2 border">{m.movementType}</td>{/* */}
+                <td className="p-2 border">{m.quantity}</td>{/* */}
+                <td className="p-2 border">{m.reason}</td>{/* */}
                 <td className="p-2 border">
                   {new Date(m.movementDate).toLocaleString()}
-                </td>
-                <td className="p-2 border">{m.createdBy}</td>
+                </td>{/* */}
+                <td className="p-2 border">{m.createdBy}</td>{/* */}
               </tr>
             ))}
           </tbody>

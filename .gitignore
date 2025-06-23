@@ -9,17 +9,27 @@
 *.iml
 
 # Gradle
+backend/.gradle/
+backend/build/
 .gradle/
 build/
 
 # Node / React
-node_modules/
-dist/
-build/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
 
 # General
 *.log
 .DS_Store
+Thumbs.db
 
 # Env files
 .env
+# No ignorar .env.example
+
+# Docker override local (si usas docker-compose.override.yml)
+docker-compose.override.yml
+
+# IDE específicos
+.vscode/

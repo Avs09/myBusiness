@@ -8,6 +8,11 @@ group = 'com.myBusiness'
 version = '0.0.1-SNAPSHOT'
 
 
+bootJar {
+    // Fija nombre constante:
+    archiveFileName = 'app.jar'
+}
+
 
 
 repositories {

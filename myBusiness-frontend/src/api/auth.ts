@@ -1,9 +1,10 @@
 // src/api/auth.ts
-const API = import.meta.env.VITE_API_URL; 
 
-/**
- * Lee el cuerpo de error como texto. Si es JSON con {message}, extrae ese campo.
- */
+const API_BASE = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
+  : ''; // si vacío, fetch('/api/usuarios/...') usará ruta relativa
+
+// Utilidad para parsear error
 async function parseError(resp: Response): Promise<string> {
   const text = await resp.text();
   if (!text) return 'Error desconocido';
@@ -16,48 +17,31 @@ async function parseError(resp: Response): Promise<string> {
 }
 
 export async function register(payload: { name: string; email: string; password: string }): Promise<void> {
-  const resp = await fetch(`${API}/users/register`, {
+  // Endpoint: POST /api/users/register
+  const url = `${API_BASE}/api/users/register`;
+  const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
   if (!resp.ok) {
-    // Leer como texto para no romper si el body viene vacío
-    const text = await resp.text();
-    let errMessage = 'Registro fallido';
-    if (text) {
-      try {
-        const obj = JSON.parse(text);
-        errMessage = obj.message || errMessage;
-      } catch {
-        // no es JSON válido, dejamos el mensaje genérico
-      }
-    }
-    throw new Error(errMessage);
+    const msg = await parseError(resp);
+    throw new Error(msg);
   }
 }
 
-
- /**
-  * Verifica el código enviado al usuario.
-  * Llama a POST /users/verify
-  */
-export async function verifyEmailCode(email: string, code: string) {
-  const resp = await fetch(`${API}/users/verify`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+export async function verifyEmailCode(email: string, code: string): Promise<void> {
+  // POST /api/users/verify
+  const url = `${API_BASE}/api/users/verify`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, code }),
   });
-
   if (!resp.ok) {
-    // Intentamos leer el JSON { message: "..." } que devuelve el back
-    const errBody = await resp.json().catch(() => null);
-    throw new Error(errBody?.message || "Error desconocido");
+    const msg = await parseError(resp);
+    throw new Error(msg);
   }
-}
-
-export interface AuthError {
-  message: string;
 }
 
 export async function login({
@@ -67,24 +51,17 @@ export async function login({
   email: string;
   password: string;
 }): Promise<string> {
-  const resp = await fetch(
-    `${import.meta.env.VITE_API_URL}/auth/login`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    }
-  );
+  // POST /api/auth/login
+  const url = `${API_BASE}/api/auth/login`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
 
   if (!resp.ok) {
-    // Intentamos leer JSON { message: "detalle del error" }
-    let errData: AuthError;
-    try {
-      errData = await resp.json();
-    } catch {
-      errData = { message: "Error desconocido" };
-    }
-    throw new Error(errData.message || "Login fallido");
+    const msg = await parseError(resp);
+    throw new Error(msg);
   }
 
   const data = await resp.json();

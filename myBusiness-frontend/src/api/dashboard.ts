@@ -1,14 +1,16 @@
 // src/api/dashboard.ts
+import axios from 'axios';
+import { axiosWithAuth } from './axiosClient';
+import type { DashboardMetricsDto } from '@/schemas/dashboard';
 
-import axios from 'axios'
-import type { DashboardMetricsDto } from '@/schemas/dashboard'
+const API_PATH = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/api'
+  : '/api';
 
-
-export async function fetchDashboardMetrics(
-  headers: Record<string, string>
-): Promise<DashboardMetricsDto> {
- 
-  const url = `${import.meta.env.VITE_API_URL}/dashboard/metrics`
-  const response = await axios.get<DashboardMetricsDto>(url, { headers })
-  return response.data
+export async function fetchDashboardMetrics(): Promise<DashboardMetricsDto> {
+  // Usamos axiosWithAuth para incluir Authorization
+  const client = axiosWithAuth();
+  // Llamada a /api/dashboard/metrics
+  const resp = await client.get<DashboardMetricsDto>('/dashboard/metrics');
+  return resp.data;
 }

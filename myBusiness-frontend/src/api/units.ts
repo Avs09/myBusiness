@@ -1,28 +1,22 @@
 // src/api/units.ts
-import axios from 'axios'
-
-const BASE_URL = import.meta.env.VITE_API_URL as string
+import { axiosWithAuth } from './axiosClient';
 
 export interface UnitDto {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
-// NUEVO: listado completo de unidades para filtros
-export async function fetchUnits(
-  headers: Record<string, string>
-): Promise<UnitDto[]> {
-  const url = `${BASE_URL}/units`
-  const resp = await axios.get<UnitDto[]>(url, { headers })
-  return resp.data
+export async function fetchUnits(): Promise<UnitDto[]> {
+  const client = axiosWithAuth();
+  const resp = await client.get<UnitDto[]>('/units');
+  return resp.data;
 }
 
-export interface UnitInputDto { name: string }
+export interface UnitInputDto { name: string; }
 export async function createUnit(
-  data: UnitInputDto,
-  headers: Record<string,string>
+  data: UnitInputDto
 ): Promise<UnitDto> {
-  const url = `${BASE_URL}/units`;
-  const resp = await axios.post<UnitDto>(url, data, { headers });
+  const client = axiosWithAuth();
+  const resp = await client.post<UnitDto>('/units', data);
   return resp.data;
 }

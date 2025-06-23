@@ -1,42 +1,42 @@
 // src/api/categories.ts
-import axios from 'axios'
+import axios from 'axios';
+import { axiosWithAuth } from './axiosClient';
 
-const BASE_URL = import.meta.env.VITE_API_URL as string
+const API_BASE = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/api'
+  : '/api';
 
 export interface CategorySummaryDto {
-  categoryId: number
-  categoryName: string
-  totalStock: number
+  categoryId: number;
+  categoryName: string;
+  totalStock: number;
 }
 
-// Ya existente: resúmenes por categoría
 export async function fetchCategorySummaries(
   headers: Record<string, string>
 ): Promise<CategorySummaryDto[]> {
-  const url = `${BASE_URL}/categories/summary`
-  const resp = await axios.get<CategorySummaryDto[]>(url, { headers })
-  return resp.data
+  const resp = await axios.get<CategorySummaryDto[]>(`${API_BASE}/categories/summary`, { headers });
+  return resp.data;
 }
-
 
 export interface CategoryDto {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
+
 export async function fetchCategories(
   headers: Record<string, string>
 ): Promise<CategoryDto[]> {
-  const url = `${BASE_URL}/categories`
-  const resp = await axios.get<CategoryDto[]>(url, { headers })
-  return resp.data
+  const resp = await axios.get<CategoryDto[]>(`${API_BASE}/categories`, { headers });
+  return resp.data;
 }
 
-export interface CategoryInputDto { name: string }
+export interface CategoryInputDto { name: string; }
 export async function createCategory(
   data: CategoryInputDto,
-  headers: Record<string,string>
+  headers: Record<string, string>
 ): Promise<CategoryDto> {
-  const url = `${BASE_URL}/categories`;
-  const resp = await axios.post<CategoryDto>(url, data, { headers });
+  const client = axiosWithAuth();
+  const resp = await client.post<CategoryDto>('/categories', data, { headers });
   return resp.data;
 }
