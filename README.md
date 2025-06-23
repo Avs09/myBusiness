@@ -1,18 +1,29 @@
-# README - MyBusiness
+# README - MyBusiness (Gestión de Inventario)
 
-## Estructura esperada tras clonar
+Guía paso a paso para clonar, configurar y ejecutar el proyecto con Docker Compose.
+
+## 1. Clonar el repositorio
+
+En tu terminal, ejecuta:
+
+```bash
+git clone https://github.com/Avs09/myBusiness.git
+cd myBusiness
+```
+
+Esto crea la carpeta `myBusiness` con la siguiente estructura:
 
 ```
-<myBusiness>/
+myBusiness/
 ├── myBusiness-backend/
-│   ├── myBusiness/
-│   │   ├── src/
-│   │   ├── build.gradle
-│   │   ├── settings.gradle
-│   │   ├── src/main/resources/application.properties
-│   │   └── Dockerfile
 │   ├── gradlew
-│   └── gradle/
+│   ├── gradle/
+│   └── myBusiness/
+│       ├── src/
+│       ├── build.gradle
+│       ├── settings.gradle
+│       ├── src/main/resources/application.properties
+│       └── Dockerfile
 ├── myBusiness-frontend/
 │   ├── src/
 │   ├── package.json
@@ -21,31 +32,21 @@
 │   └── Dockerfile
 ├── .env.example
 ├── docker-compose.yml
-├── Makefile
 ├── .gitignore
 └── .github/workflows/ci.yml
 ```
 
-## 1. Clonar el repositorio
+## 2. Crear archivo de entorno (.env)
 
-Ejecutar en terminal:
-
-```bash
-git clone https://github.com/Avs09/myBusiness.git
-cd myBusiness
-```
-
-## 2. Copiar variables de entorno
-
-En `myBusiness`, copiar:
+En `myBusiness/`, copia:
 
 ```bash
 cp .env.example .env
 ```
 
-Contenido de `myBusiness/.env`:
+Verifica que `myBusiness/.env` contenga exactamente:
 
-```
+```env
 POSTGRES_DB=myBusiness
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=Babaluarara123
@@ -58,98 +59,85 @@ SPRING_JPA_OPEN_IN_VIEW=false
 VITE_API_URL=
 ```
 
-## 3. Verificar archivos en backend
+## 3. Verificar archivos clave
 
-* Dockerfile: `myBusiness/myBusiness-backend/myBusiness/Dockerfile`
-* Gradle wrapper: `myBusiness/myBusiness-backend/gradlew` y `myBusiness>/myBusiness-backend/gradle/`
-* build.gradle y settings.gradle: `myBusiness/myBusiness-backend/myBusiness/build.gradle` y `myBusiness/myBusiness-backend/myBusiness/settings.gradle`
-* application.properties: `myBusiness/myBusiness-backend/myBusiness/src/main/resources/application.properties`
+* **Backend**:
 
-## 4. Verificar archivos en frontend
+  * Dockerfile: `myBusiness/myBusiness-backend/myBusiness/Dockerfile`
+  * Gradle wrapper: `myBusiness/myBusiness-backend/gradlew` y `myBusiness/myBusiness-backend/gradle/`
+  * build.gradle: `myBusiness/myBusiness-backend/myBusiness/build.gradle`
+  * settings.gradle: `myBusiness/myBusiness-backend/myBusiness/settings.gradle`
+  * application.properties: `myBusiness/myBusiness-backend/myBusiness/src/main/resources/application.properties`
+* **Frontend**:
 
-* Dockerfile: `myBusiness/myBusiness-frontend/Dockerfile`
-* package.json: `myBusiness/myBusiness-frontend/package.json`
-* vite.config.ts: `myBusiness/myBusiness-frontend/vite.config.ts`
-* nginx.conf: `myBusiness/myBusiness-frontend/nginx.conf`
-* src/: `myBusiness/myBusiness-frontend/src/`
+  * Dockerfile: `myBusiness/myBusiness-frontend/Dockerfile`
+  * package.json: `myBusiness/myBusiness-frontend/package.json`
+  * vite.config.ts: `myBusiness/myBusiness-frontend/vite.config.ts`
+  * nginx.conf: `myBusiness/myBusiness-frontend/nginx.conf`
+  * Código fuente: `myBusiness/myBusiness-frontend/src/`
+* **docker-compose.yml**: `myBusiness/docker-compose.yml`
+* **.gitignore**: `myBusiness/.gitignore`
+* **.env.example**: `myBusiness/.env.example`
+* **CI config**: `myBusiness/.github/workflows/ci.yml`
 
-## 5. Verificar docker-compose.yml y Makefile
+## 4. Docker Compose
 
-* `docker-compose.yml`: `myBusiness/docker-compose.yml`. Debe contener:
-
-  * Servicio db con puerto host `${DB_PORT}:5432`.
-  * Servicio backend con `context: ./myBusiness-backend/myBusiness`.
-  * Servicio frontend con `context: ./myBusiness-frontend`.
-* `Makefile`: `myBusiness/Makefile`. Debe incluir:
-
-  ```makefile
-  up:
-  	docker-compose up -d --build
-
-  down:
-  	docker-compose down
-
-  ps:
-  	docker-compose ps
-
-  logs-backend:
-  	docker logs -f mybusiness-backend
-
-  logs-db:
-  	docker logs -f mybusiness-db
-
-  logs-frontend:
-  	docker logs -f mybusiness-frontend
-  ```
-
-## 6. Levantar servicios
-
-En `myBusiness`, ejecutar:
+En `myBusiness/`, ejecuta:
 
 ```bash
-make up
+# Levantar servicios
+docker-compose up -d --build
 ```
 
-(si Makefile no está, ejecutar directamente: `docker-compose up -d --build`)
+* Esto construye imágenes y levanta contenedores:
 
-## 7. Verificar contenedores
+  * Postgres en `localhost:5433`
+  * Backend en `localhost:8080`
+  * Frontend en `localhost:3000`
+
+Para verificar estado:
 
 ```bash
-make ps
+docker-compose ps
 ```
 
-Debe mostrar:
-
-* mybusiness-db -> 0.0.0.0:5433->5432
-* mybusiness-backend -> 0.0.0.0:8080->8080
-* mybusiness-frontend -> 0.0.0.0:3000->80
-
-## 8. Conectar a la base de datos
-
-En pgAdmin o cliente SQL, conectar:
-
-* Host: localhost
-* Puerto: 5433
-* Base de datos: myBusiness
-* Usuario: postgres
-* Contraseña: Babaluarara123
-
-## 9. Acceder a la aplicación
-
-* Frontend: [http://localhost:3000](http://localhost:3000)
-* Backend API: [http://localhost:8080/api](http://localhost:8080/api)
-
-## 10. Detener servicios
-
-En `myBusiness`, ejecutar:
+Para ver logs de backend:
 
 ```bash
-make down
+docker-compose logs -f mybusiness-backend
 ```
 
-## 11. CI/CD
+Para detener y eliminar contenedores/redes:
 
-Revisar `myBusiness/.github/workflows/ci.yml`. Debe contener:
+```bash
+docker-compose down
+```
+
+Para reiniciar sin cache si es necesario:
+
+```bash
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+## 5. Conexión a la base de datos
+
+En pgAdmin o cliente SQL, crea conexión con:
+
+* Host: `localhost`
+* Puerto: `5433`
+* Base de datos: `myBusiness`
+* Usuario: `postgres`
+* Contraseña: `Babaluarara123`
+
+## 6. Acceder a la aplicación
+
+* **Frontend**: abre en el navegador [http://localhost:3000](http://localhost:3000)
+* **Backend API**: accesible en [http://localhost:8080/api](http://localhost:8080/api)
+
+## 7. CI/CD (GitHub Actions)
+
+Archivo en `myBusiness/.github/workflows/ci.yml`:
 
 ```yaml
 name: CI
@@ -182,5 +170,6 @@ jobs:
           npm ci
           npm run build
 ```
+
 
 Fin.
