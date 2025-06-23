@@ -20,11 +20,12 @@ services:
     image: proyecto-backend:latest
     container_name: mybusiness-backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SPRING_JPA_OPEN_IN_VIEW: ${SPRING_JPA_OPEN_IN_VIEW:false}
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE}"
+      SPRING_DATASOURCE_URL: "${SPRING_DATASOURCE_URL}"
+      SPRING_DATASOURCE_USERNAME: "${SPRING_DATASOURCE_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${SPRING_DATASOURCE_PASSWORD}"
+      SPRING_JPA_OPEN_IN_VIEW: "${SPRING_JPA_OPEN_IN_VIEW}"
+
       # MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD según .env si usas correo
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
@@ -42,7 +43,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend         # ajusta si tu carpeta difiere
+      context: ./myBusiness-frontend        # ajusta si tu carpeta difiere
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
