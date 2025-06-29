@@ -15,7 +15,7 @@ services:
 
   backend:
     build:
-      context: ./myBusiness-backend/myBusiness            # ajusta si tu carpeta se llama distinto
+      context: ./myBusiness-backend/myBusiness          
       dockerfile: Dockerfile
     image: proyecto-backend:latest
     container_name: mybusiness-backend
@@ -26,7 +26,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: "${SPRING_DATASOURCE_PASSWORD}"
       SPRING_JPA_OPEN_IN_VIEW: "${SPRING_JPA_OPEN_IN_VIEW}"
 
-      # MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD según .env si usas correo
+      # MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD según .env
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USERNAME: ${MAIL_USERNAME}
@@ -43,15 +43,12 @@ services:
 
   frontend:
     build:
-      context: ./myBusiness-frontend        # ajusta si tu carpeta difiere
+      context: ./myBusiness-frontend       
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
     image: proyecto-frontend:latest
     container_name: mybusiness-frontend
-    environment:
-      # Si deseas exponer VITE_API_URL en runtime, pero Vite ya la embebió en build.
-      # Aquí no es estrictamente necesario exponer. Si quisieras:
       VITE_API_URL: ${VITE_API_URL}
     ports:
       - "3000:80"
