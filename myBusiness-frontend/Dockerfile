@@ -1,4 +1,4 @@
-# -----------------------------
+# ./Dockerfile 
 # Etapa 1: Construcción con Node
 # -----------------------------
 FROM node:18-alpine AS build

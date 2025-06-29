@@ -1,5 +1,5 @@
 // src/api/alerts.ts
-import axios from 'axios';
+import axios from 'axios'
 import { axiosWithAuth } from './axiosClient';
 
 const API_BASE = import.meta.env.VITE_API_URL

@@ -1,3 +1,4 @@
+//src/types/zxcvbn.d.ts
 declare module 'zxcvbn' {
   interface ZXCVBNResult {
     score: 0 | 1 | 2 | 3 | 4;
