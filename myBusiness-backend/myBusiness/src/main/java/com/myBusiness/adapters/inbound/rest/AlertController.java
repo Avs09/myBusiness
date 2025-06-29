@@ -27,7 +27,6 @@ public class AlertController {
 
     /**
      * GET /api/alerts/unread → solo alertas no leídas, para polling de notificaciones efímeras.
-     * Marca estas alertas como leídas para que no vuelvan a salir en próximos polls.
      */
     @GetMapping("/unread")
     public ResponseEntity<List<AlertOutputDto>> listUnread() {
@@ -45,7 +44,7 @@ public class AlertController {
     }
 
     /**
-     * POST /api/alerts/{id}/read → Marca alerta como leída (descartar en dashboard).
+     * POST /api/alerts/{id}/read → Marca alerta como leída.
      */
     @PostMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable("id") Long id) {
