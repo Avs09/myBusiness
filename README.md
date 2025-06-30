@@ -55,6 +55,14 @@ root/
 
 ## Configuración del Entorno Local
 
+### Copiar archivo de entorno
+
+Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la raíz ejecuta:
+
+ ```cp .env.example .env ```
+
+ Abre luego .env y reemplaza los valores según tu configuración y tu cuenta de Mailtrap.
+ 
 ### Backend
 
 1. Entra a la carpeta `backend`:
