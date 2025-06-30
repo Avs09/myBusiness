@@ -49,6 +49,7 @@ services:
         VITE_API_URL: ${VITE_API_URL}
     image: proyecto-frontend:latest
     container_name: mybusiness-frontend
+    environment:
       VITE_API_URL: ${VITE_API_URL}
     ports:
       - "3000:80"
