@@ -104,20 +104,19 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 ### Con Docker Compose
 1. Ejecuta:
 
-  #### para levantar servicios
-   ```bash
-   docker-compose up --build
-   ```
-  ##### para eliminar contenedores
-  ```bash 
-  docker-compose down
-  ```
+    #### para levantar servicios
+     ```bash
+     docker-compose up --build
+     ```
+    ##### para eliminar contenedores
+    ```bash 
+    docker-compose down
+    ```
 
-3. Accede a:
+2. Accede a:
 
    * **Frontend:** `http://localhost:3000`
    * **API Backend:** `http://localhost:8080/api`
-   * **Salud (Actuator):** `http://localhost:8080/actuator/health`
 
 ## Ejecución de la Aplicación
 
