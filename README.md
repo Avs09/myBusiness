@@ -68,7 +68,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 1. Entra a la carpeta `myBusiness` del backend:
 
    ```bash
-   cd myBusiness-backend/myBusiness
+   cd ./myBusiness-backend/myBusiness
    ```
 
 2. Cambia de perfil a desarrollo. ejecuta:
@@ -88,7 +88,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 1. Entra a la carpeta `frontend`:
 
    ```bash
-   cd myBusiness-frontend
+   cd ./myBusiness-frontend
    ```
 2. Instala dependencias y levanta el servidor de desarrollo:
 
