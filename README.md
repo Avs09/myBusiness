@@ -53,9 +53,8 @@ root/
 └── README.md              # Este archivo
 ```
 
-## Configuración del Entorno Local
 
-### Copiar archivo de entorno
+## Copiar archivo de entorno
 
 Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la raíz ejecuta:
 
@@ -65,7 +64,10 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    ```
 
  Abre luego .env y reemplaza los valores según tu configuración y tu cuenta de Mailtrap.
+
  
+## Configuración del Entorno Local
+
 ### Backend
 
 1. Entra a la carpeta `myBusiness` del backend:
