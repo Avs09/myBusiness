@@ -70,7 +70,12 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    ```bash
    cd myBusiness-backend/myBusiness
    ```
-2. Construye y ejecuta con Gradle:
+
+2. Cambia de perfil a desarrollo. ejecuta:
+   ```bash
+   $Env:SPRING_PROFILES_ACTIVE = "dev"
+   ```
+3. Construye y ejecuta con Gradle:
 
    ```bash
    .\gradlew.bat clean build
@@ -94,7 +99,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 
    * La app estará en `http://localhost:3000` y proxyará `/api` a `http://localhost:8080/api`.
 
-## Configuración del entorno de producción con Docker-compose
+## Configuración del entorno de producción con Docker-compose   
 1. Ejecuta en la raíz:
 
     #### para levantar servicios
