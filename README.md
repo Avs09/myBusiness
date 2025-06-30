@@ -75,19 +75,14 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    ```bash
    cd ./myBusiness-backend/myBusiness
    ```
-
-2. Cambia de perfil a desarrollo. ejecuta:
-   ```bash
-   $Env:SPRING_PROFILES_ACTIVE = "dev"
-   ```
-3. Construye y ejecuta con Gradle:
+   
+2. Construye y ejecuta con Gradle:
 
    ```bash
    .\gradlew.bat clean build
    .\gradlew.bat bootRun
    ```
-
-   * El servidor quedará escuchando en el puerto `8080`.
+   
 ### Frontend
 
 1. Entra a la carpeta `frontend`:
@@ -102,7 +97,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    npm run dev
    ```
 
-   * La app estará en `http://localhost:3000` y proxyará `/api` a `http://localhost:8080/api`.
+   * La app estará en `http://localhost:3000`
 
 ## Configuración del entorno de producción con Docker-compose   
 1. Ejecuta en la raíz:
@@ -119,7 +114,6 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 2. Accede a:
 
    * **Frontend:** `http://localhost:3000`
-   * **API Backend:** `http://localhost:8080/api`
 
 ## Ejecución de la Aplicación
 
