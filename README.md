@@ -78,12 +78,6 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    ```
 
    * El servidor quedará escuchando en el puerto `8080`.
-3. Configuración en `src/main/resources/application.properties`. Se puede sobrescribir con variables de entorno:
-
-   * `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
-   * `jwt.secret`, `jwt.expiration-ms`
-   * `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`
-
 ### Frontend
 
 1. Entra a la carpeta `frontend`:
