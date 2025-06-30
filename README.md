@@ -1,200 +1,169 @@
-# MyBusiness - Sistema de Gestión de Inventario
+MyBusiness – Sistema de Gestión de Inventario
 
-**MyBusiness** es una aplicación full‑stack para la gestión de inventarios, desarrollada con **Java (Spring Boot)** en el backend y **React (Vite + TypeScript)** en el frontend. Ofrece funcionalidades para administrar productos, categorías, unidades, movimientos de stock, alertas, reportes y autenticación de usuarios con verificación por correo (SMTP vía Mailtrap).
+MyBusiness es una aplicación full‑stack para la gestión de inventarios, desarrollada con Java (Spring Boot) en el backend y React (Vite + TypeScript) en el frontend. Ofrece funcionalidades para administrar productos, categorías, unidades, movimientos de stock, alertas, reportes y autenticación de usuarios con verificación por correo (SMTP vía Mailtrap).
+Índice
 
----
+    Características
 
-## Índice
+    Requisitos Previos
 
-1. [Características](#características)  
-2. [Requisitos Previos](#requisitos-previos)  
-3. [Estructura del Repositorio](#estructura-del-repositorio)  
-4. [Configuración del Entorno Local](#configuración-del-entorno-local)  
-   - [Copiar variables de entorno](#copiar-variables-de-entorno)  
-   - [Backend](#backend)  
-   - [Frontend](#frontend)  
-   - [Con Docker Compose](#con-docker-compose)  
-5. [Ejecución de la Aplicación](#ejecución-de-la-aplicación)  
-6. [Documentación de la API](#documentación-de-la-api)  
-7. [Consejos de Desarrollo](#consejos-de-desarrollo)  
-8. [Contribuir](#contribuir)  
-9. [Licencia](#licencia)  
+    Estructura del Repositorio
 
----
+    Configuración del Entorno Local
 
-## Características
+    Ejecución de la Aplicación
 
-- **Registro e Inicio de Sesión** con verificación de correo y autenticación JWT.  
-- **Gestión de Productos** (CRUD) con umbrales y auditoría de campos.  
-- **Movimientos de Stock**: entradas, salidas y ajustes, con cálculo automático de stock.  
-- **Alertas** de stock bajo/alto, marcar como leídas o eliminar.  
-- **Reportes y Dashboard**: KPIs, snapshots de inventario, tendencias diarias/semanales, exportación a CSV/Excel/PDF.  
-- **Campos Personalizados** y valores asociados para cada producto.  
-- **Notificaciones por Correo** (SMTP vía Mailtrap).  
-- **Auditoría** de quién creó o modificó y fecha/hora usando Spring Data JPA.  
+    Documentación de la API
 
----
+    Consejos de Desarrollo
 
-## Requisitos Previos
+    Contribuir
 
-- **Git**  
-- **Java 21** (LTS) y **Gradle 8.5+** (para backend local)  
-- **Node.js 18+** y **npm** (para frontend local)  
-- **Docker** y **Docker Compose** (opcional)  
+    Licencia
 
----
+Características
 
-## Estructura del Repositorio
+    Registro e Inicio de Sesión con verificación de correo y autenticación JWT
 
-```text
+    Gestión de Productos (CRUD) con umbrales y auditoría de campos
+
+    Movimientos de Stock: entradas, salidas y ajustes con cálculo automático
+
+    Alertas de stock bajo/alto (marcar como leídas/eliminar)
+
+    Reportes y Dashboard: KPIs, snapshots, tendencias, exportación a CSV/Excel/PDF
+
+    Campos Personalizados para productos
+
+    Notificaciones por Correo (SMTP vía Mailtrap)
+
+    Auditoría de cambios con Spring Data JPA
+
+Requisitos Previos
+
+    Git
+
+    Java 21+ y Gradle 8.5+
+
+    Node.js 18+ y npm
+
+    Docker y Docker Compose (opcional)
+
+Estructura del Repositorio
+text
+
 root/
 ├── backend/               # Spring Boot (Java)
-│   ├── src/main/java/...  # Código Java
+│   ├── src/main/java/     # Código fuente
 │   ├── build.gradle       # Configuración de Gradle
-│   └── Dockerfile         # Docker image del backend
-├── frontend/              # React (Vite + TS)
-│   ├── src/               # Código React
+│   └── Dockerfile
+├── frontend/              # React (Vite + TypeScript)
+│   ├── src/               # Componentes React
 │   ├── vite.config.ts     # Configuración de Vite
-│   └── Dockerfile         # Docker image del frontend
-├── docker-compose.yml     # Orquesta: db, backend y frontend
-├── .env.example           # Ejemplo de variables de entorno
+│   └── Dockerfile
+├── docker-compose.yml     # Orquestación de servicios
+├── .env.example           # Plantilla de variables
 └── README.md              # Este archivo
 
 Configuración del Entorno Local
 Copiar variables de entorno
-
-Antes de arrancar, copia el archivo de ejemplo y adáptalo:
+bash
 
 cp .env.example .env
 
-Abre .env y ajusta:
+Edita .env y completa los valores (especialmente Mailtrap):
+env
 
-    PostgreSQL
+# Mailtrap (obtén credenciales en mailtrap.io)
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=<TU_USER>
+MAIL_PASSWORD=<TU_PASSWORD>
 
-POSTGRES_DB=...
-POSTGRES_USER=...
-POSTGRES_PASSWORD=...
-DB_PORT=...
-
-Spring Boot
-
-SPRING_PROFILES_ACTIVE=dev
-SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB}
-SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-SPRING_JPA_OPEN_IN_VIEW=false
-
-JWT (en application.properties o variables de entorno)
-
-jwt.secret=...
-jwt.expiration-ms=...
-
-Mail (Mailtrap)
-
-    Regístrate en https://mailtrap.io
-
-    Crea un inbox nuevo
-
-    Copia las credenciales SMTP y pégalas aquí:
-
-    MAIL_HOST=sandbox.smtp.mailtrap.io
-    MAIL_PORT=2525
-    MAIL_USERNAME=TU_USER_DE_MAILTRAP
-    MAIL_PASSWORD=TU_PASS_DE_MAILTRAP
-
-Frontend
-
-    VITE_API_URL=http://localhost:8080
+# PostgreSQL
+POSTGRES_DB=mybusiness
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=secret
 
 Backend
-
-    Entra al directorio:
+bash
 
 cd backend
-
-Construye y arranca:
-
-    ./gradlew clean build
-    ./gradlew bootRun
-
-    El servidor escucha en http://localhost:8080 y las props se pueden ajustar vía .env o application.properties.
+./gradlew clean build
+./gradlew bootRun  # Escucha en http://localhost:8080
 
 Frontend
-
-    Entra al directorio:
+bash
 
 cd frontend
-
-Instala dependencias y levanta el servidor de desarrollo:
-
 npm install
-npm run dev
-
-La app estará en http://localhost:3000, con proxy /api → http://localhost:8080/api.
-
-Build para producción:
-
-    npm run build
-
-    Genera dist/ listo para servir.
+npm run dev  # Escucha en http://localhost:3000
 
 Con Docker Compose
+bash
 
-    Asegúrate de tener copiado .env.
+docker-compose up --build
 
-    Arranca todo:
+Accede a:
 
-    docker-compose up --build
+    Frontend: http://localhost:3000
 
-    Accede a:
+    API: http://localhost:8080/api
 
-        Frontend: http://localhost:3000
-
-        Backend API: http://localhost:8080/api
-
-        Healthcheck: http://localhost:8080/actuator/health
+    Healthcheck: http://localhost:8080/actuator/health
 
 Ejecución de la Aplicación
 
-    Abre tu navegador en la landing.
+    Abre http://localhost:3000
 
-    Haz clic en Registro, rellena nombre, email y contraseña.
+    Regístrate con nombre/email/contraseña
 
-    Ve a Mailtrap, copia el código de verificación.
+    Verifica tu cuenta con el código de Mailtrap
 
-    Introduce el código en la pantalla de verificación.
-
-    Inicia sesión con tu email/contraseña.
+    Inicia sesión y gestiona tu inventario
 
 Documentación de la API
 
-Con el backend en marcha, visita:
+Con el backend en ejecución:
+🔗 Swagger UI: http://localhost:8080/swagger-ui.html
 
-http://localhost:8080/swagger-ui.html
+Incluye:
 
-Ahí verás todos los endpoints, esquemas y ejemplos.
+    Endpoints interactivos
+
+    Esquemas de petición/respuesta
+
+    Ejemplos de uso
+
 Consejos de Desarrollo
 
-    Hot‑reload frontend: npm run dev
+    Hot-reload frontend: npm run dev
 
-    SQL logs: activa spring.jpa.show-sql=true en desarrollo
+    Ver SQL generado: Agrega spring.jpa.show-sql=true en application.properties
 
-    Auditoría: revisa AuditingConfig
+    Nueva funcionalidad: Sigue el flujo:
+    usecase → controller → repository
 
-    Sigue la capa de usecase → controller → repository
+    Auditoría: Revisa AuditingConfig.java
 
 Contribuir
 
-    Haz fork del repositorio.
+    Haz fork del repositorio
 
-    Crea una rama:
+    Crea tu rama:
 
-    git checkout -b feature/mi-nueva-funcionalidad
+bash
 
-    Realiza cambios con commits claros.
+git checkout -b feature/nueva-funcionalidad
 
-    Abre un Pull Request.
+    Realiza commits descriptivos
+
+    Abre un Pull Request
 
 Licencia
 
-Este proyecto está bajo la licencia MIT.
+MIT
+text
+
+Permiso libre de uso, modificación y distribución.
+Incluye atribución al autor original.
