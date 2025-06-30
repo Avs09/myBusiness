@@ -65,16 +65,16 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
  
 ### Backend
 
-1. Entra a la carpeta `backend`:
+1. Entra a la carpeta `myBusiness` del backend:
 
    ```bash
-   cd myBusiness-backend
+   cd myBusiness-backend/myBusiness
    ```
 2. Construye y ejecuta con Gradle:
 
    ```bash
-   ./gradlew clean build
-   ./gradlew bootRun
+   .\gradlew.bat clean build
+   .\gradlew.bat bootRun
    ```
 
    * El servidor quedará escuchando en el puerto `8080`.
