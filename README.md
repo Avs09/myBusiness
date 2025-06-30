@@ -57,11 +57,9 @@ root/
 │   ├── Dockerfile
 │   └── .env.example       # Variables de entorno para Vite
 ├── docker-compose.yml     # Orquesta PostgreSQL, backend y frontend
-└── README.md              # Este archivo
+└── README.md              # Este archivo ---
 
-
----
-
+```text
 ## Configuración del Entorno Local
 
 ### Variables de Entorno & Mailtrap
