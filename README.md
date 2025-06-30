@@ -102,9 +102,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    * Genera la carpeta `dist/` con los archivos estáticos.
 
 ### Con Docker Compose
-
-1. Copia `.env.example` a `.env` y ajusta variables si lo deseas.
-2. Ejecuta:
+1. Ejecuta:
 
    ```bash
    docker-compose up --build
