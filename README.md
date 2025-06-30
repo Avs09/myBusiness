@@ -44,16 +44,17 @@
 ## Estructura del Repositorio
 
 root/
-├── backend/ # Spring Boot (Java)
-│ ├── src/
-│ ├── build.gradle
-│ └── Dockerfile
-├── frontend/ # React + Vite + TS
-│ ├── src/
-│ ├── vite.config.ts
-│ └── Dockerfile
+├── backend/               # Spring Boot (Java)
+│   ├── src/
+│   ├── build.gradle
+│   └── Dockerfile
+├── frontend/              # React + Vite + TS
+│   ├── src/
+│   ├── vite.config.ts
+│   └── Dockerfile
 ├── docker-compose.yml
 └── README.md
+
 
 
 ---
