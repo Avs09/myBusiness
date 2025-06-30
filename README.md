@@ -59,7 +59,9 @@ root/
 
 Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la raíz ejecuta:
 
- ```cp .env.example .env ```
+   ```bash
+   cp .env.example .env
+   ```
 
  Abre luego .env y reemplaza los valores según tu configuración y tu cuenta de Mailtrap.
  
