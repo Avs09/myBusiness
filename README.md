@@ -68,7 +68,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 1. Entra a la carpeta `backend`:
 
    ```bash
-   cd backend
+   cd myBusiness-backend
    ```
 2. Construye y ejecuta con Gradle:
 
@@ -83,7 +83,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 1. Entra a la carpeta `frontend`:
 
    ```bash
-   cd frontend
+   cd myBusiness-frontend
    ```
 2. Instala dependencias y levanta el servidor de desarrollo:
 
