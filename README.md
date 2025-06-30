@@ -41,20 +41,23 @@
 
 ---
 
+
 ## Estructura del Repositorio
 
+```text
 root/
-├── backend/               # Spring Boot (Java)
-│   ├── src/
+├── backend/               # Aplicación Spring Boot (Java)
+│   ├── src/main/java/...  # Código fuente Java
+│   ├── src/main/resources/application.properties
 │   ├── build.gradle
 │   └── Dockerfile
-├── frontend/              # React + Vite + TS
-│   ├── src/
+├── frontend/              # Aplicación React (Vite + TS)
+│   ├── src/               # Código fuente React/TypeScript
 │   ├── vite.config.ts
-│   └── Dockerfile
-├── docker-compose.yml
-└── README.md
-
+│   ├── Dockerfile
+│   └── .env.example       # Variables de entorno para Vite
+├── docker-compose.yml     # Orquesta PostgreSQL, backend y frontend
+└── README.md              # Este archivo
 
 
 ---
