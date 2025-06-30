@@ -1,174 +1,151 @@
-MyBusiness - Sistema de Gestión de Inventario
+# MyBusiness - Sistema de Gestión de Inventario
 
-MyBusiness es una aplicación full‑stack para la gestión de inventarios, desarrollada con Java (Spring Boot) en el backend y React (Vite + TypeScript) en el frontend. Ofrece funcionalidades para administrar productos, categorías, unidades, movimientos de stock, alertas, reportes y autenticación de usuarios con verificación por correo.
-Índice
+**MyBusiness** es una aplicación full-stack para la gestión de inventarios, desarrollada con **Java (Spring Boot)** en el backend y **React (Vite + TypeScript)** en el frontend. Ofrece funcionalidades para administrar productos, categorías, unidades, movimientos de stock, alertas, reportes y autenticación de usuarios con verificación por correo.
 
-    Características
+---
 
-    Requisitos Previos
+## Índice
 
-    Estructura del Repositorio
+1. [Características](#características)  
+2. [Requisitos Previos](#requisitos-previos)  
+3. [Estructura del Repositorio](#estructura-del-repositorio)  
+4. [Configuración del Entorno Local](#configuración-del-entorno-local)  
+   - [Variables de Entorno & Mailtrap](#variables-de-entorno--mailtrap)  
+   - [Backend](#backend)  
+   - [Frontend](#frontend)  
+   - [Con Docker Compose](#con-docker-compose)  
+5. [Ejecución de la Aplicación](#ejecución-de-la-aplicación)  
+6. [Documentación de la API](#documentación-de-la-api)  
 
-    Configuración del Entorno Local
+---
 
-        Variables de Entorno
+## Características
 
-        Backend
+- **Registro e Inicio de Sesión** con verificación de correo y autenticación JWT.  
+- **Gestión de Productos** (CRUD) con umbrales y auditoría de campos.  
+- **Movimientos de Stock**: entradas, salidas y ajustes, con cálculo automático de stock.  
+- **Alertas** de stock bajo/alto, marcar como leídas o eliminar.  
+- **Reportes y Dashboard**: KPIs, snapshots de inventario, tendencias diarias/semanales, exportación a CSV/Excel/PDF.  
+- **Campos Personalizados** y valores asociados para cada producto.  
+- **Notificaciones por Correo** (SMTP via Mailtrap).  
+- **Auditoría** de quién creó o modificó y fecha/hora usando Spring Data JPA.  
 
-        Frontend
+---
 
-        Con Docker Compose
+## Requisitos Previos
 
-    Ejecución de la Aplicación
+- **Git**  
+- **Java 21** (LTS) + **Gradle 8.5+**  
+- **Node.js 18+** + **npm**  
+- **Docker** + **Docker Compose** (opcional)  
 
-    Documentación de la API
+---
 
-Características
-
-    Registro e Inicio de Sesión con verificación de correo y autenticación JWT.
-
-    Gestión de Productos (CRUD) con umbrales y auditoría de campos.
-
-    Movimientos de Stock: entradas, salidas y ajustes, con cálculo automático de stock.
-
-    Alertas de stock bajo/alto, marcar como leídas o eliminar.
-
-    Reportes y Dashboard: KPIs, snapshots de inventario, tendencias diarias/semanales, exportación a CSV/Excel/PDF.
-
-    Campos Personalizados y valores asociados para cada producto.
-
-    Notificaciones por Correo (SMTP, Mailtrap por defecto).
-
-    Auditoría de quién creó o modificó y fecha/hora usando Spring Data JPA.
-
-Requisitos Previos
-
-    Git
-
-    Java 21 (LTS) y Gradle 8.5+ (para backend local)
-
-    Node.js 18+ y npm (para frontend local)
-
-    Docker y Docker Compose (opcional, para despliegue en contenedores)
-
-Estructura del Repositorio
+## Estructura del Repositorio
 
 root/
-├── backend/               # Aplicación Spring Boot (Java)
-│   ├── src/main/java/...  # Código fuente Java
-│   ├── build.gradle       # Configuración de Gradle
-│   └── Dockerfile         # Instrucciones de Docker
-├── frontend/              # Aplicación React (Vite + TS)
-│   ├── src/               # Código fuente React
-│   ├── vite.config.ts     # Configuración de Vite
-│   └── Dockerfile         # Instrucciones de Docker
-├── docker-compose.yml     # Orquesta base de datos, backend y frontend
-└── README.md              # Este archivo
+├── backend/ # Spring Boot (Java)
+│ ├── src/
+│ ├── build.gradle
+│ └── Dockerfile
+├── frontend/ # React + Vite + TS
+│ ├── src/
+│ ├── vite.config.ts
+│ └── Dockerfile
+├── docker-compose.yml
+└── README.md
 
-Configuración del Entorno Local
-Variables de Entorno
 
-Antes de arrancar backend o frontend, copia y adapta el archivo de ejemplo:
+---
 
-cp .env.example .env
+## Configuración del Entorno Local
 
-Abre .env y revisa:
+### Variables de Entorno & Mailtrap
 
-# --- PostgreSQL ---
-POSTGRES_DB=myBusiness
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=Babaluarara123
-DB_PORT=5433
+1. Copia y renombra el fichero de ejemplo:
 
-# --- Spring Boot (backend) ---
-SPRING_PROFILES_ACTIVE=dev
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/${POSTGRES_DB}
-SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-SPRING_JPA_OPEN_IN_VIEW=false
+   ```bash
+   cp .env.example .env
 
-# --- Frontend (Vite) ---
-VITE_API_URL=
+    Abre .env y ajusta tus credenciales:
 
-# --- Mail (Mailtrap) ---
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=<TU_MAILTRAP_USER>
-MAIL_PASSWORD=<TU_MAILTRAP_PASS>
+    # --- PostgreSQL ---
+    POSTGRES_DB=myBusiness
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=Babaluarara123
+    DB_PORT=5433
 
-Configuración de Mailtrap
+    # --- Backend ---
+    SPRING_PROFILES_ACTIVE=dev
+    SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+    SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    SPRING_JPA_OPEN_IN_VIEW=false
 
-    Regístrate o inicia sesión en Mailtrap.
+    # --- Frontend ---
+    VITE_API_URL=
 
-    Crea un Inbox.
+    # --- Mail (Mailtrap) ---
+    MAIL_HOST=sandbox.smtp.mailtrap.io
+    MAIL_PORT=2525
+    MAIL_USERNAME=<TU_MAILTRAP_USER>
+    MAIL_PASSWORD=<TU_MAILTRAP_PASSWORD>
 
-    Ve a Sandbox > Integration
+    Configurar Mailtrap:
 
-    Copia Username y Password.
+        Regístrate en Mailtrap.io.
 
-    Pega esos valores en tu .env reemplazando <TU_MAILTRAP_USER> y <TU_MAILTRAP_PASS>.
+        Ve a sandbox > SMPT
+
+        Copia Username, Password y pégalos en .env.
+
+        Con esto la aplicación enviará correos en entorno de desarrollo.
 
 Backend
 
-    Entra al directorio backend:
-
 cd backend
+./gradlew clean build
+./gradlew bootRun
 
-Comprueba que tu .env contenga las credenciales de Mailtrap.
+    El servidor arranca en http://localhost:8080.
 
-Construye y ejecuta:
-
-    ./gradlew clean build
-    ./gradlew bootRun
-
-    El servidor estará en http://localhost:8080.
+    Lee variables de .env para configuración (base de datos, JWT, SMTP…).
 
 Frontend
 
-    Entra al directorio frontend:
-
 cd frontend
-
-Instala dependencias y arranca en modo desarrollo:
-
 npm install
 npm run dev
 
-Accede a http://localhost:3000 (proxy a /api → http://localhost:8080/api).
+    Sirve en http://localhost:3000 y hace proxy de /api → http://localhost:8080/api.
 
-Para compilar en producción:
+    Para build de producción:
 
     npm run build
 
-    Genera la carpeta dist/.
+    Genera /dist con los archivos estáticos.
 
 Con Docker Compose
 
-    Asegúrate de haber copiado y editado .env en la raíz del proyecto.
+docker-compose up --build
 
-    Levanta todos los servicios:
+    Frontend: http://localhost:3000
 
-    docker-compose up --build
-
-    URLs de acceso:
-
-        Frontend: http://localhost:3000
-
-        API Backend: http://localhost:8080/api
+    API Backend: http://localhost:8080/api
 
 Ejecución de la Aplicación
 
-    Abre http://localhost:3000.
+    Visita http://localhost:3000.
 
-    Regístrate; recibirás un código en tu Inbox de Mailtrap.
+    Regístrate y revisa tu bandeja en Mailtrap.
 
-    Introduce el código para verificar el email.
+    Ingresa el código de verificación.
 
-    Inicia sesión y disfruta del dashboard y funcionalidades.
+    Haz login y explora el panel.
 
 Documentación de la API
 
-Con el backend en marcha, visita:
+Con el backend activo, abre:
 
 http://localhost:8080/swagger-ui.html
 
