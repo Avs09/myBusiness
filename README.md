@@ -60,6 +60,7 @@ root/
 Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la raíz ejecuta:
 
    ```bash
+   cd myBusiness
    cp .env.example .env
    ```
 
