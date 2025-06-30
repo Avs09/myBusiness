@@ -93,16 +93,9 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
    ```
 
    * La app estará en `http://localhost:3000` y proxyará `/api` a `http://localhost:8080/api`.
-3. Para producción:
 
-   ```bash
-   npm run build
-   ```
-
-   * Genera la carpeta `dist/` con los archivos estáticos.
-
-### Con Docker Compose
-1. Ejecuta:
+## Configuración del entorno de producción con Docker-compose
+1. Ejecuta en la raíz:
 
     #### para levantar servicios
      ```bash
