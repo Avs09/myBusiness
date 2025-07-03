@@ -68,7 +68,7 @@ export default function Movements() {
           page,
           pageInfo.pageSize,
           filtersToUse,
-          headers
+          
         );
         setData(resp.content);
         setPageInfo({
@@ -155,7 +155,7 @@ export default function Movements() {
               onClick={async () => {
                 if (!confirm('¿Seguro que deseas eliminar este movimiento?')) return;
                 try {
-                  await deleteMovement(row.original.id!, headers);
+                  await deleteMovement(row.original.id!);
                   toast.success('Movimiento eliminado');
                   // recargar la misma página con filtros aplicados
                   fetchPage(pageInfo.pageIndex, appliedFilters);

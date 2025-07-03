@@ -11,7 +11,7 @@ export default function TopProductsList() {
 
   useEffect(() => {
     const headers = getAuthHeader()
-    fetchTopProducts(30, 5, headers)
+    fetchTopProducts(30, 5)
       .then((arr) => setData(arr))
       .catch((err: any) => {
         console.error('Error cargando top productos:', err)

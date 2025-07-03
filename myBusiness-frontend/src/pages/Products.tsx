@@ -57,7 +57,7 @@ export default function Products() {
     setLoading(true)
     try {
       const headers = getAuthHeader() as Record<string,string>
-      const raw = await fetchProductsPaginated(page, pageInfo.pageSize, filters, headers)
+      const raw = await fetchProductsPaginated(page, pageInfo.pageSize, filters)
       setProductos(raw.content)
       setPageInfo({
         pageNumber: raw.number,
@@ -79,10 +79,10 @@ export default function Products() {
     const headers = getAuthHeader() as Record<string,string>
     try {
       if (editingProduct) {
-        await updateProduct(editingProduct.id, data, headers)
+        await updateProduct(editingProduct.id, data)
         toast.success('Producto actualizado')
       } else {
-        await createProduct(data, headers)
+        await createProduct(data)
         toast.success('Producto creado')
       }
       setShowProductModal(false)
@@ -95,7 +95,7 @@ export default function Products() {
     if (!confirm('¿Seguro que quieres eliminar este producto?')) return
     try {
       const headers = getAuthHeader() as Record<string,string>
-      await deleteProduct(id, headers)
+      await deleteProduct(id)
       toast.success('Producto eliminado')
       loadPage(pageInfo.pageNumber)
     } catch {
@@ -166,7 +166,7 @@ export default function Products() {
     for (let i = 0; i < previewData.length; i++) {
       if (errorsData.some(e => e.row === i + 2)) { fail++; continue }
       try {
-        await createProduct(previewData[i], headers)
+        await createProduct(previewData[i])
         success++
       } catch {
         fail++

@@ -22,7 +22,7 @@ export default function MovementTypeBarChart() {
 
   useEffect(() => {
     const headers = getAuthHeader()
-    fetchMovementTypeCounts(7, headers)
+    fetchMovementTypeCounts(7)
       .then((arr) => {
         setData(arr)
       })

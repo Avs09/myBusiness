@@ -33,7 +33,7 @@ export default function ProductFilters({ filters, onChange }: ProductFiltersProp
         toast.error('No se pudieron cargar categorías')
       })
 
-    fetchUnits(headers)
+    fetchUnits()
       .then(setUnits)
       .catch(err => {
         console.error('Error cargando unidades:', err)

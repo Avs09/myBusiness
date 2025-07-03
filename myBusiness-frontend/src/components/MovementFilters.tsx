@@ -40,7 +40,7 @@ export default function MovementFilters({ filters, onChange, onApply }: Movement
     // Ejecutar una sola vez al montar
     const headers = getAuthHeader() as Record<string, string>;
     setLoadingProducts(true);
-    fetchAllProducts(headers)
+    fetchAllProducts()
       .then(list => {
         const opts = list.map(p => ({ id: p.id, name: p.name }));
         setProducts(opts);

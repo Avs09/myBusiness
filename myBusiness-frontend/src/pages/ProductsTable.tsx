@@ -59,7 +59,7 @@ export default function ProductsTable({
         page,
         pageInfo.pageSize,
         filters,
-        headers
+        
       )
       setData(resp.content)
       setPageInfo({
@@ -123,7 +123,7 @@ export default function ProductsTable({
                     categoryId: updated.categoryId,
                     unitId: updated.unitId,
                   },
-                  headers
+                  
                 )
                 toast.success('Precio actualizado')
               } catch {

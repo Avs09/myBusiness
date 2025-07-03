@@ -33,7 +33,7 @@ export default function ReportFilters({ filters, onChange, onApply }: ReportFilt
 
   useEffect(() => {
     fetchCategories(headers).then(setCategories)
-    fetchUnits(headers).then(setUnits)
+    fetchUnits().then(setUnits)
   }, [])
 
   return (

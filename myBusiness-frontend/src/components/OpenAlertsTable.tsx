@@ -24,21 +24,17 @@ export default function OpenAlertsTable() {
 
   useEffect(() => {
     loadAlerts()
- 
   }, [])
 
-  if (loading) {
-    return <p className="text-gray-600 mt-4">Cargando alertas...</p>
-  }
-  if (alerts.length === 0) {
-    return <p className="text-gray-600 mt-4">No hay alertas.</p>
-  }
+  if (loading) return <p className="text-gray-600 mt-4">Cargando alertas...</p>
+  if (alerts.length === 0) return <p className="text-gray-600 mt-4">No hay alertas.</p>
 
   const tipoEnEspanol = (type: string) => {
     if (type === 'UNDERSTOCK') return 'Stock Bajo'
-    if (type === 'OVERSTOCK') return 'Stock Alto'
+    if (type === 'OVERSTOCK')  return 'Stock Alto'
     return type
   }
+
   return (
     <div className="overflow-x-auto mt-4">
       <table className="w-full bg-white shadow rounded-lg overflow-hidden border-collapse">
@@ -47,6 +43,7 @@ export default function OpenAlertsTable() {
             <th className="p-2 border text-left">ID</th>
             <th className="p-2 border text-left">Producto</th>
             <th className="p-2 border text-left">Movimiento ID</th>
+            <th className="p-2 border text-left">Stock Actual</th> {/* ← Nueva columna */}
             <th className="p-2 border text-left">Tipo</th>
             <th className="p-2 border text-left">Umbral Mínimo</th>
             <th className="p-2 border text-left">Umbral Máximo</th>
@@ -59,7 +56,8 @@ export default function OpenAlertsTable() {
             <tr key={a.id} className="hover:bg-gray-50">
               <td className="p-2 border">{a.id}</td>
               <td className="p-2 border">{a.productName}</td>
-              <td className="p-2 border">{a.movementId != null ? a.movementId : '-'}</td>
+              <td className="p-2 border">{a.movementId ?? '-'}</td>
+              <td className="p-2 border">{a.currentStock}</td> {/* ← Muestra el campo */}
               <td className="p-2 border">{tipoEnEspanol(a.alertType)}</td>
               <td className="p-2 border">{a.thresholdMin}</td>
               <td className="p-2 border">{a.thresholdMax}</td>

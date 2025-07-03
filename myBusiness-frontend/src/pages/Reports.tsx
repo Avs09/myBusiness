@@ -174,9 +174,9 @@ export default function Reports() {
   const fetchCharts = async () => {
     setChartsLoading(true)
     try {
-      setEvolution(await fetchStockEvolution(30, headers))
-      setByType(await fetchMovementTypeCounts(30, headers))
-      setTopProducts(await fetchTopProducts(30, 5, headers))
+      setEvolution(await fetchStockEvolution(30))
+      setByType(await fetchMovementTypeCounts(30))
+      setTopProducts(await fetchTopProducts(30, 5))
     } catch (err) {
       console.error(err)
       toast.error('Error cargando datos de gráficos')

@@ -41,7 +41,7 @@ export default function Dashboard() {
     const headers = rawHeaders as Record<string, string>
 
     setLoading(true)
-    fetchDashboardMetrics(headers)
+    fetchDashboardMetrics()
       .then((data) => {
         setMetrics(data)
       })
@@ -54,7 +54,7 @@ export default function Dashboard() {
       })
 
     setLoading24h(true)
-    fetchMovementsLast24hCount(headers)
+    fetchMovementsLast24hCount()
       .then((count) => {
         setMov24h(count)
       })

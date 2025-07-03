@@ -20,7 +20,7 @@ export default function StockEvolutionChart() {
 
   useEffect(() => {
     const headers = getAuthHeader()
-    fetchStockEvolution(30, headers)
+    fetchStockEvolution(30)
       .then((arr) => {
         setData(arr)
       })

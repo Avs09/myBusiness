@@ -58,7 +58,7 @@ export default function MovementForm({ initialData, onSaved, onCancel }: Movemen
   useEffect(() => {
     setLoadingProducts(true);
     const hdr = getAuthHeader() as Record<string, string>;
-    fetchAllProducts(hdr)
+    fetchAllProducts()
       .then(list => {
         setProducts(list);
         setProductsError(null);
@@ -76,7 +76,7 @@ export default function MovementForm({ initialData, onSaved, onCancel }: Movemen
   useEffect(() => {
     if (watchProductId && watchProductId > 0) {
       const hdr = getAuthHeader() as Record<string, string>;
-      fetchProductById(watchProductId, hdr)
+      fetchProductById(watchProductId)
         .then(prod => {
           setProductDetail(prod);
           // Si el DTO incluye currentStock, lo tomamos
@@ -144,9 +144,9 @@ export default function MovementForm({ initialData, onSaved, onCancel }: Movemen
     try {
       let saved: MovementOutputDto;
       if (isEdit && initialData) {
-        saved = await updateMovement(initialData.id, dto, headers);
+        saved = await updateMovement(initialData.id, dto);
       } else {
-        saved = await createMovement(dto, headers);
+        saved = await createMovement(dto);
       }
       toast.success(isEdit ? 'Movimiento actualizado' : 'Movimiento registrado');
       onSaved(saved);

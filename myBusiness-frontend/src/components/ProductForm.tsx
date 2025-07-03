@@ -54,10 +54,21 @@ export default function ProductForm({
   // Cargo categorías y unidades
   useEffect(() => {
     fetchCategories(headers)
-      .then(setCategories)
+      .then(data => {
+        setCategories(data)
+        if (data.length === 0) {
+          toast.error('Primero debes crear al menos una categoría')
+        }
+      })
       .catch(() => toast.error('No se pudieron cargar categorías'))
-    fetchUnits(headers)
-      .then(setUnits)
+
+    fetchUnits()
+      .then(data => {
+        setUnits(data)
+        if (data.length === 0) {
+          toast.error('Primero debes crear al menos una unidad')
+        }
+      })
       .catch(() => toast.error('No se pudieron cargar unidades'))
   }, [])
 
@@ -81,7 +92,9 @@ export default function ProductForm({
       case 1:
         return !errors.thresholdMin && !errors.thresholdMax
       case 2:
-        return !errors.categoryId && !errors.unitId
+        // además validar que existan categorías y unidades
+        if (categories.length === 0 || units.length === 0) return false
+        return !errors.categoryId && !errors.unitId && formValues.categoryId > 0 && formValues.unitId > 0
       default:
         return false
     }
@@ -213,6 +226,11 @@ export default function ProductForm({
             />
             {errors.unitId && <p className="text-red-600 text-xs">{errors.unitId.message}</p>}
           </div>
+          {(categories.length === 0 || units.length === 0) && (
+            <p className="text-red-600 text-sm">
+              Debes crear primero una categoría y una unidad antes de registrar un producto.
+            </p>
+          )}
         </div>
       )}
 

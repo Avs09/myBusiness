@@ -35,7 +35,7 @@ export default function ProductImport() {
     fetchCategories(headers)
       .then(setCategories)
       .catch(() => toast.error('Error cargando categorías'))
-    fetchUnits(headers)
+    fetchUnits()
       .then(setUnits)
       .catch(() => toast.error('Error cargando unidades'))
   }, [])

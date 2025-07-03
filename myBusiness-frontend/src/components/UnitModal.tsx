@@ -15,7 +15,7 @@ export default function UnitModal({ open, onClose, onCreated }: Props) {
     setLoading(true);
     try {
       const headers = {};
-      const newUnit = await createUnit({ name: name.trim() }, headers);
+      const newUnit = await createUnit({ name: name.trim() });
       toast.success('Unidad creada');
       onCreated(newUnit);
       setName('');

@@ -12,9 +12,10 @@ export interface AlertOutputDto {
   productName: string;
   movementId?: number;
   alertType: string;
-  createdDate: string;
+  currentStock: number;    // Nuevo campo: stock actual del producto
   thresholdMin: number;
   thresholdMax: number;
+  createdDate: string;
 }
 
 export interface CriticalAlertOutputDto {
@@ -30,29 +31,39 @@ export interface CriticalAlertOutputDto {
 export async function fetchAlertsHistory(
   headers: Record<string, string>
 ): Promise<AlertOutputDto[]> {
-  const resp = await axios.get<AlertOutputDto[]>(`${API_BASE}/alerts`, { headers });
-  return resp.data;
+  const resp = await axios.get<AlertOutputDto[]>(
+    `${API_BASE}/alerts`,
+    { headers }
+  )
+  return resp.data
 }
 
 export async function deleteAlert(
   id: number,
   headers: Record<string, string>
 ): Promise<void> {
-  const client = axiosWithAuth();
-  await client.delete(`/alerts/${id}`, { headers });
+  const client = axiosWithAuth()
+  await client.delete(`/alerts/${id}`, { headers })
 }
 
 export async function fetchCriticalAlerts(
   headers: Record<string, string>
 ): Promise<CriticalAlertOutputDto[]> {
-  const resp = await axios.get<CriticalAlertOutputDto[]>(`${API_BASE}/alerts/critical`, { headers });
-  return resp.data;
+  const resp = await axios.get<CriticalAlertOutputDto[]>(
+    `${API_BASE}/alerts/critical`,
+    { headers }
+  )
+  return resp.data
 }
 
 export async function markAlertRead(
   id: number,
   headers: Record<string, string>
 ): Promise<void> {
-  const client = axiosWithAuth();
-  await client.post(`/alerts/${id}/read`, null, { headers });
+  const client = axiosWithAuth()
+  await client.post(
+    `/alerts/${id}/read`,
+    null,
+    { headers }
+  )
 }

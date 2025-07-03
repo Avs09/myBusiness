@@ -1,7 +1,7 @@
 // src/components/UnitForm.tsx
+
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useAuth } from '@/hooks/useAuth'
 import { createUnit } from '@/api/units'
 import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
@@ -12,7 +12,6 @@ interface UnitFormProps {
 }
 
 export default function UnitForm({ onClose, onCreated }: UnitFormProps) {
-  const { getAuthHeader } = useAuth()
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -24,7 +23,8 @@ export default function UnitForm({ onClose, onCreated }: UnitFormProps) {
     }
     setLoading(true)
     try {
-      await createUnit({ name: name.trim() }, getAuthHeader())
+      // Nota: createUnit ya usa axiosWithAuth internamente
+      await createUnit({ name: name.trim() })
       toast.success('Unidad creada')
       onCreated()
       onClose()

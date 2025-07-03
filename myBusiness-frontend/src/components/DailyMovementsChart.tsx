@@ -22,7 +22,7 @@ export default function DailyMovementsChart() {
 
   useEffect(() => {
     const headers = getAuthHeader()
-    fetchDailyMovementTrend(7, headers)
+    fetchDailyMovementTrend(7)
       .then((arr) => {
     
         setData(arr)
