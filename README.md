@@ -108,7 +108,7 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
      ```
     ##### para eliminar contenedores
     ```bash 
-    docker-compose down
+    docker-compose down -v
     ```
 
 2. Accede a:
