@@ -1,12 +1,14 @@
-// src/main/java/com/myBusiness/application/usecase/ListAlertsUseCase.java
 package com.myBusiness.application.usecase;
 
 import com.myBusiness.application.dto.AlertOutputDto;
 import com.myBusiness.domain.model.Alert;
 import com.myBusiness.domain.port.AlertRepository;
+import com.myBusiness.domain.port.InventoryMovementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +16,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ListAlertsUseCase {
     private final AlertRepository alertRepo;
+    private final InventoryMovementRepository movementRepo;
 
     /**
-     * Devuelve histórico completo de alertas automáticas.
+     * Devuelve histórico completo de alertas automáticas con cuanto stock había cuando se dispararon.
      */
     public List<AlertOutputDto> execute() {
         return alertRepo.findAll().stream()
@@ -25,11 +28,27 @@ public class ListAlertsUseCase {
     }
 
     private AlertOutputDto toDto(Alert a) {
-        Integer min = null, max = null;
-        if (a.getProduct() != null) {
-            min = a.getProduct().getThresholdMin();
-            max = a.getProduct().getThresholdMax();
+        // Calcular stock actual al momento:
+        BigDecimal stock = BigDecimal.ZERO;
+        var movs = movementRepo.findAllByProductId(a.getProduct().getId());
+        movs.sort(Comparator.comparing(m -> m.getMovementDate()));
+        for (var m : movs) {
+            switch (m.getMovementType()) {
+                case ENTRY:
+                    stock = stock.add(m.getQuantity());
+                    break;
+                case EXIT:
+                    stock = stock.subtract(m.getQuantity());
+                    break;
+                case ADJUSTMENT:
+                    stock = m.getQuantity();
+                    break;
+            }
         }
+        BigDecimal currentStock = stock.max(BigDecimal.ZERO);
+        Integer min = a.getProduct().getThresholdMin();
+        Integer max = a.getProduct().getThresholdMax();
+
         return AlertOutputDto.builder()
                 .id(a.getId())
                 .productId(a.getProduct().getId())
@@ -40,6 +59,7 @@ public class ListAlertsUseCase {
                 .createdDate(a.getCreatedDate())
                 .thresholdMin(min)
                 .thresholdMax(max)
+                .currentStock(currentStock)
                 .build();
     }
 }

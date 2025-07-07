@@ -1,10 +1,8 @@
-// src/hooks/useAlertPolling.ts
 import { useEffect, useRef } from 'react'
-import axios from 'axios'
+import axios from 'axios' // ya lo tienes, o puedes usar fetch desde alerts.ts si prefieres
 import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
-import React from 'react'
-import { AlertCircle } from 'lucide-react' 
+import { AlertCircle } from 'lucide-react'
 
 function AlertToast({ productName, alertType }: { productName: string; alertType: string }) {
   return (
@@ -12,12 +10,11 @@ function AlertToast({ productName, alertType }: { productName: string; alertType
       <AlertCircle className="w-6 h-6 text-red-600 animate-pulse" />
       <div>
         <p className="font-semibold">Alerta: {productName}</p>
-        <p className="text-sm">Tipo: {alertType}</p>
+        <p className="text-sm">Tipo: {alertType === 'UNDERSTOCK' ? 'Stock bajo' : 'Stock alto'}</p>
       </div>
     </div>
   )
 }
-
 
 export function useAlertPolling(intervalMs: number = 5000) {
   const { getAuthHeader, user } = useAuth()
@@ -30,9 +27,9 @@ export function useAlertPolling(intervalMs: number = 5000) {
     const fetchAlerts = async () => {
       try {
         const headers = getAuthHeader() as Record<string, string>
-        const resp = await axios.get<any[]>(`${import.meta.env.VITE_API_URL}/alerts/unread`, { headers })
+        const alerts = await fetchUnreadAlerts(headers)
         if (!mounted) return
-        resp.data.forEach(alert => {
+        alerts.forEach(alert => {
           const id: number = alert.id
           if (!seenIdsRef.current.has(id)) {
             toast.custom(t => (
@@ -42,7 +39,7 @@ export function useAlertPolling(intervalMs: number = 5000) {
               `}>
                 <AlertToast productName={alert.productName} alertType={alert.alertType} />
               </div>
-            ), { duration: 10000 /* 10s */ })
+            ), { duration: 10000 })
             seenIdsRef.current.add(id)
           }
         })
@@ -54,10 +51,10 @@ export function useAlertPolling(intervalMs: number = 5000) {
     ;(async () => {
       try {
         const headers = getAuthHeader() as Record<string, string>
-        const resp = await axios.get<any[]>(`${import.meta.env.VITE_API_URL}/alerts/unread`, { headers })
-        resp.data.forEach(alert => seenIdsRef.current.add(alert.id))
+        const initialAlerts = await fetchUnreadAlerts(headers)
+        initialAlerts.forEach(alert => seenIdsRef.current.add(alert.id))
       } catch {
-       
+        // Ignorar errores iniciales
       }
       fetchAlerts()
       const timer = setInterval(fetchAlerts, intervalMs)

@@ -1,12 +1,14 @@
-// src/main/java/com/myBusiness/application/usecase/ListAllAlertsUseCase.java
 package com.myBusiness.application.usecase;
 
 import com.myBusiness.application.dto.AlertOutputDto;
 import com.myBusiness.domain.model.Alert;
 import com.myBusiness.domain.port.AlertRepository;
+import com.myBusiness.domain.port.InventoryMovementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ListAllAlertsUseCase {
     private final AlertRepository alertRepo;
+    private final InventoryMovementRepository movementRepo;
 
     public List<AlertOutputDto> execute() {
         return alertRepo.findAll().stream()
@@ -22,21 +25,31 @@ public class ListAllAlertsUseCase {
     }
 
     private AlertOutputDto toDto(Alert a) {
-        Integer min = null, max = null;
-        if (a.getProduct() != null) {
-            min = a.getProduct().getThresholdMin();
-            max = a.getProduct().getThresholdMax();
+        BigDecimal stock = BigDecimal.ZERO;
+        var movs = movementRepo.findAllByProductId(a.getProduct().getId());
+        movs.sort(Comparator.comparing(m -> m.getMovementDate()));
+        for (var m : movs) {
+            switch (m.getMovementType()) {
+                case ENTRY:    stock = stock.add(m.getQuantity()); break;
+                case EXIT:     stock = stock.subtract(m.getQuantity()); break;
+                case ADJUSTMENT: stock = m.getQuantity(); break;
+            }
         }
+        BigDecimal currentStock = stock.max(BigDecimal.ZERO);
+        Integer min = a.getProduct().getThresholdMin();
+        Integer max = a.getProduct().getThresholdMax();
+
         return AlertOutputDto.builder()
                 .id(a.getId())
-                .productId(a.getProduct() != null ? a.getProduct().getId() : null)
-                .productName(a.getProduct() != null ? a.getProduct().getName() : null)
+                .productId(a.getProduct().getId())
+                .productName(a.getProduct().getName())
                 .movementId(a.getMovement() != null ? a.getMovement().getId() : null)
                 .alertType(a.getAlertType().name())
                 .triggeredAt(a.getTriggeredAt())
                 .createdDate(a.getCreatedDate())
                 .thresholdMin(min)
                 .thresholdMax(max)
+                .currentStock(currentStock)
                 .build();
     }
 }

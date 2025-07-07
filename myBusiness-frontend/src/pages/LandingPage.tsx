@@ -1,4 +1,3 @@
-// src/pages/LandingPage.tsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,9 +7,9 @@ import PasswordInput from "@/components/ui/passwordInput";
 import { Controller } from "react-hook-form";
 import { verifyEmailCode } from "@/api/auth";
 
+
 import {
   Mail as MailIcon,
-  Lock as LockIcon,
   User as UserIcon,
   CheckCircle,
   Shield,
@@ -19,7 +18,6 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-// Formularios y validación Zod
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
@@ -55,7 +53,6 @@ export default function LandingPage() {
   const { login, requestRegister: doRegister } = useAuth();
   const navigate = useNavigate();
 
-  // ── Login form
   const {
     register: loginRegister,
     handleSubmit: onLoginSubmit,
@@ -63,10 +60,7 @@ export default function LandingPage() {
   } = useForm<LoginDto>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onLogin = async (data: LoginDto) => {
@@ -75,12 +69,10 @@ export default function LandingPage() {
       toast.success("¡Bienvenido!");
       navigate("/dashboard");
     } catch (err: any) {
-      // Ahora mostramos exactamente err.message (que vino de loginApi)
       toast.error(err.message || "Login fallido");
     }
   };
 
-  // ── Register form
   const {
     register: reg,
     control,
@@ -90,17 +82,11 @@ export default function LandingPage() {
   } = useForm<RegisterDto>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   const onRegister = async (data: RegisterDto) => {
     try {
-   
       await doRegister({
         name: data.name,
         email: data.email,
@@ -111,12 +97,10 @@ export default function LandingPage() {
       setPendingPassword(data.password);
       setStep("verify");
     } catch (err: any) {
-      
       toast.error(err.message || "Registro fallido");
     }
   };
 
-  // ── Verify form
   const {
     register: verifyRegister,
     handleSubmit: onVerifySubmit,
@@ -126,19 +110,15 @@ export default function LandingPage() {
   const onVerify = async (data: { code: string }) => {
     try {
       await verifyEmailCode(pendingEmail, data.code);
-      toast.success(
-        "Correo verificado correctamente. Ahora ya puedes iniciar sesión."
-      );
-      navigate("/"); // o '/login'
+      toast.success("Correo verificado correctamente. Ahora ya puedes iniciar sesión.");
+      navigate("/");
     } catch (err: any) {
-      // Si el back devolvió 400 con un mensaje, err.message contiene esa descripción
       toast.error(err.message || "Código inválido");
     }
   };
 
   return (
-    <div className="h-screen w-full flex flex-col">
-      {/* Hero Section */}
+    <div className="min-h-screen w-full flex flex-col">
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -146,6 +126,7 @@ export default function LandingPage() {
         className="flex flex-1 items-center justify-center bg-gradient-to-br from-blue-50 to-white w-full"
       >
         <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-16 px-8">
+          {/* Left */}
           <motion.div
             initial={{ x: -200, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -156,15 +137,11 @@ export default function LandingPage() {
               Bienvenido a <span className="text-blue-600">MyBusiness</span>
             </h1>
             <p className="text-gray-600 text-xl lg:text-2xl">
-              Optimiza tu inventario, reduce pérdidas y toma decisiones basadas
-              en datos en tiempo real.
+              Optimiza tu inventario, reduce pérdidas y toma decisiones basadas en datos en tiempo real.
             </p>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {features.map((f, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm"
-                >
+                <li key={idx} className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm">
                   {f.icon}
                   <span className="text-gray-700 font-medium">{f.text}</span>
                 </li>
@@ -172,21 +149,31 @@ export default function LandingPage() {
             </ul>
           </motion.div>
 
-          {/* Forms Section */}
+          {/* Right */}
           <motion.div
             initial={{ x: 200, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
             className="flex flex-col justify-center items-center px-8"
           >
+            {/* Logo */}
+<motion.img
+  src="/logo.png"
+  alt="MyBusiness Logo"
+  className="h-24 mx-auto mb-4"
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+/>
+
+
+
             {/* Tabs */}
             <div className="flex justify-center mb-6 space-x-4">
               <button
                 onClick={() => setStep("login")}
                 className={`px-4 py-2 font-medium ${
-                  step === "login"
-                    ? "border-b-4 border-blue-600 text-blue-600"
-                    : "text-gray-500"
+                  step === "login" ? "border-b-4 border-blue-600 text-blue-600" : "text-gray-500"
                 }`}
               >
                 Login
@@ -194,9 +181,7 @@ export default function LandingPage() {
               <button
                 onClick={() => setStep("register")}
                 className={`px-4 py-2 font-medium ${
-                  step === "register"
-                    ? "border-b-4 border-green-600 text-green-600"
-                    : "text-gray-500"
+                  step === "register" ? "border-b-4 border-green-600 text-green-600" : "text-gray-500"
                 }`}
               >
                 Registro
@@ -205,7 +190,6 @@ export default function LandingPage() {
 
             <Card className="w-full max-w-md">
               <CardContent className="p-6 space-y-4">
-                {/* Login Form */}
                 {step === "login" && (
                   <form onSubmit={onLoginSubmit(onLogin)}>
                     <fieldset disabled={loginSubmitting} className="space-y-4">
@@ -218,14 +202,11 @@ export default function LandingPage() {
                           {...loginRegister("email")}
                         />
                       </div>
-
-                      {/* Mostrar error de email */}
                       {loginErrors.email && (
-                        <p className="form-feedback form-feedback--error mt-c1">
+                        <p className="form-feedback form-feedback--error mt-1">
                           {loginErrors.email.message}
                         </p>
                       )}
-
                       <PasswordInput
                         {...loginRegister("password")}
                         placeholder="Contraseña"
@@ -233,7 +214,6 @@ export default function LandingPage() {
                         error={loginErrors.password?.message}
                         className="w-full"
                       />
-
                       <Button type="submit" className="w-full h-12">
                         {loginSubmitting ? "Procesando..." : "Iniciar Sesión"}
                       </Button>
@@ -241,11 +221,9 @@ export default function LandingPage() {
                   </form>
                 )}
 
-                {/* Register Form */}
                 {step === "register" && (
                   <form onSubmit={onRegisterSubmit(onRegister)}>
                     <fieldset disabled={regSubmitting} className="space-y-4">
-                      {/* Nombre */}
                       <div className="relative w-full">
                         <UserIcon className="absolute left-3 top-3.5 text-gray-400" />
                         <Input
@@ -260,7 +238,6 @@ export default function LandingPage() {
                         </p>
                       )}
 
-                      {/* Email */}
                       <div className="relative w-full">
                         <MailIcon className="absolute left-3 top-3.5 text-gray-400" />
                         <Input
@@ -275,7 +252,6 @@ export default function LandingPage() {
                         </p>
                       )}
 
-                      {/* Contraseña */}
                       <Controller
                         name="password"
                         control={control}
@@ -288,8 +264,6 @@ export default function LandingPage() {
                           />
                         )}
                       />
-
-                      {/* Confirmar contraseña */}
                       <Controller
                         name="confirmPassword"
                         control={control}
@@ -303,7 +277,6 @@ export default function LandingPage() {
                         )}
                       />
 
-                      {/* Mensaje de coincidencia */}
                       {watch("confirmPassword") &&
                         (watch("password") === watch("confirmPassword") ? (
                           <p className="form-feedback form-feedback--success mt-1">
@@ -315,18 +288,13 @@ export default function LandingPage() {
                           </p>
                         ))}
 
-                      <Button
-                        type="submit"
-                        className="w-full py-3"
-                        disabled={regSubmitting}
-                      >
+                      <Button type="submit" className="w-full py-3">
                         {regSubmitting ? "Registrando..." : "Crear cuenta"}
                       </Button>
                     </fieldset>
                   </form>
                 )}
 
-                {/* Verify Form */}
                 {step === "verify" && (
                   <form onSubmit={onVerifySubmit(onVerify)}>
                     <fieldset disabled={verifySubmitting} className="space-y-4">
