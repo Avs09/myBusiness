@@ -1,3 +1,4 @@
+// src/main/java/com/myBusiness/application/usecase/ListRecentMovementsUseCase.java
 package com.myBusiness.application.usecase;
 
 import com.myBusiness.application.dto.MovementOutputDto;
@@ -22,6 +23,7 @@ public class ListRecentMovementsUseCase {
             .map(m -> MovementOutputDto.builder()
                 .id(m.getId())
                 .productId(m.getProduct().getId())
+                .productName(m.getProduct().getName())   // ← aquí asignamos el nombre
                 .movementType(m.getMovementType().name())
                 .quantity(m.getQuantity())
                 .reason(m.getReason())

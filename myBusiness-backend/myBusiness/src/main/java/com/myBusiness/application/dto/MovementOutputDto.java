@@ -9,9 +9,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-/**
- * DTO devuelto al crear/leer/editar un movimiento.
- */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,7 +16,7 @@ import java.time.Instant;
 public class MovementOutputDto {
     private Long id;
     private Long productId;
-    private String productName;
+    private String productName;      
     private String movementType;
     private BigDecimal quantity;
     private String reason;

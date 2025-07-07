@@ -30,14 +30,15 @@ public class NotificationRepositoryImpl implements NotificationRepository {
 
     @Override
     public Optional<Notification> findById(Long id) {
-        Notification n = em.find(Notification.class, id);
-        return Optional.ofNullable(n);
+        return Optional.ofNullable(em.find(Notification.class, id));
     }
 
     @Override
     public List<Notification> findAllUnread() {
         TypedQuery<Notification> q = em.createQuery(
-            "SELECT n FROM Notification n WHERE n.isRead = false ORDER BY n.createdDate DESC",
+            "SELECT n FROM Notification n " +
+            " WHERE n.isRead = false " +
+            " ORDER BY n.createdDate DESC",
             Notification.class
         );
         return q.getResultList();
@@ -46,7 +47,8 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     @Override
     public List<Notification> findAll() {
         TypedQuery<Notification> q = em.createQuery(
-            "SELECT n FROM Notification n ORDER BY n.createdDate DESC",
+            "SELECT n FROM Notification n " +
+            " ORDER BY n.createdDate DESC",
             Notification.class
         );
         return q.getResultList();

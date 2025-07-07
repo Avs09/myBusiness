@@ -156,15 +156,6 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="flex flex-col justify-center items-center px-8"
           >
-            {/* Logo */}
-<motion.img
-  src="/logo.png"
-  alt="MyBusiness Logo"
-  className="h-24 mx-auto mb-4"
-  initial={{ opacity: 0, y: -20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.5 }}
-/>
 
 
 

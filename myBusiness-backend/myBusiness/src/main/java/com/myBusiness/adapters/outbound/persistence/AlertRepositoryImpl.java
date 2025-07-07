@@ -30,14 +30,26 @@ public class AlertRepositoryImpl implements AlertRepository {
 
     @Override
     public Optional<Alert> findById(Long id) {
-        Alert a = em.find(Alert.class, id);
-        return Optional.ofNullable(a);
+        // JOIN FETCH producto y movimiento para inicializar
+        TypedQuery<Alert> q = em.createQuery(
+            "SELECT a FROM Alert a " +
+            " LEFT JOIN FETCH a.product p " +
+            " LEFT JOIN FETCH a.movement m " +
+            " WHERE a.id = :id",
+            Alert.class
+        );
+        q.setParameter("id", id);
+        return q.getResultStream().findFirst();
     }
 
     @Override
     public List<Alert> findAllUnread() {
         TypedQuery<Alert> q = em.createQuery(
-            "SELECT a FROM Alert a WHERE a.isRead = false ORDER BY a.triggeredAt DESC",
+            "SELECT a FROM Alert a " +
+            " JOIN FETCH a.product p " +
+            " LEFT JOIN FETCH a.movement m " +
+            " WHERE a.isRead = false " +
+            " ORDER BY a.triggeredAt DESC",
             Alert.class
         );
         return q.getResultList();
@@ -46,7 +58,11 @@ public class AlertRepositoryImpl implements AlertRepository {
     @Override
     public List<Alert> findAllByProductId(Long productId) {
         TypedQuery<Alert> q = em.createQuery(
-            "SELECT a FROM Alert a WHERE a.product.id = :pid ORDER BY a.triggeredAt DESC",
+            "SELECT a FROM Alert a " +
+            " JOIN FETCH a.product p " +
+            " LEFT JOIN FETCH a.movement m " +
+            " WHERE p.id = :pid " +
+            " ORDER BY a.triggeredAt DESC",
             Alert.class
         );
         q.setParameter("pid", productId);
@@ -56,7 +72,10 @@ public class AlertRepositoryImpl implements AlertRepository {
     @Override
     public List<Alert> findAll() {
         TypedQuery<Alert> q = em.createQuery(
-            "SELECT a FROM Alert a ORDER BY a.triggeredAt DESC",
+            "SELECT a FROM Alert a " +
+            " JOIN FETCH a.product p " +
+            " LEFT JOIN FETCH a.movement m " +
+            " ORDER BY a.triggeredAt DESC",
             Alert.class
         );
         return q.getResultList();

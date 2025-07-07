@@ -1,3 +1,4 @@
+// src/main/java/com/myBusiness/adapters/outbound/persistence/ProductRepositoryImpl.java
 package com.myBusiness.adapters.outbound.persistence;
 
 import com.myBusiness.domain.model.Product;
@@ -5,7 +6,6 @@ import com.myBusiness.domain.port.ProductRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
@@ -30,43 +30,84 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Optional<Product> findById(Long id) {
-        return Optional.ofNullable(entityManager.find(Product.class, id));
+        TypedQuery<Product> q = entityManager.createQuery(
+            "SELECT p FROM Product p " +
+            " JOIN FETCH p.category " +
+            " JOIN FETCH p.unit " +
+            " WHERE p.id = :id",
+            Product.class
+        );
+        q.setParameter("id", id);
+        List<Product> list = q.getResultList();            
+        if (list.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(list.get(0));
     }
 
     @Override
     public Optional<Product> findByName(String name) {
-        String query = "SELECT p FROM Product p WHERE p.name = :name";
-        return entityManager.createQuery(query, Product.class)
-                .setParameter("name", name)
-                .getResultStream()
-                .findFirst();
+        TypedQuery<Product> q = entityManager.createQuery(
+            "SELECT p FROM Product p " +
+            " JOIN FETCH p.category " +
+            " JOIN FETCH p.unit " +
+            " WHERE p.name = :name",
+            Product.class
+        );
+        q.setParameter("name", name);
+        List<Product> list = q.getResultList();           
+        if (list.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(list.get(0));
     }
 
     @Override
     public List<Product> findAll() {
-        String query = "SELECT p FROM Product p";
-        return entityManager.createQuery(query, Product.class).getResultList();
+        TypedQuery<Product> q = entityManager.createQuery(
+            "SELECT p FROM Product p " +
+            " JOIN FETCH p.category " +
+            " JOIN FETCH p.unit",
+            Product.class
+        );
+        return q.getResultList();
     }
 
     @Override
     public void deleteById(Long id) {
         findById(id).ifPresent(entityManager::remove);
     }
-    
+
     @Override
     public Page<Product> findAll(Pageable pageable) {
-        String jpql = "SELECT p FROM Product p ORDER BY p.id";
-        TypedQuery<Product> q = entityManager.createQuery(jpql, Product.class);
+        // 1) contenido paginado con fetch
+        TypedQuery<Product> q = entityManager.createQuery(
+            "SELECT p FROM Product p " +
+            " JOIN FETCH p.category " +
+            " JOIN FETCH p.unit " +
+            " ORDER BY p.id",
+            Product.class
+        );
         q.setFirstResult((int) pageable.getOffset());
         q.setMaxResults(pageable.getPageSize());
         List<Product> content = q.getResultList();
-        long total = count();
+
+        // 2) contar total (sin fetch)
+        TypedQuery<Long> countQ = entityManager.createQuery(
+            "SELECT COUNT(p) FROM Product p",
+            Long.class
+        );
+        long total = countQ.getSingleResult();
+
         return new PageImpl<>(content, pageable, total);
     }
 
     @Override
     public long count() {
-        return entityManager.createQuery("SELECT COUNT(p) FROM Product p", Long.class)
-                 .getSingleResult();
+        TypedQuery<Long> q = entityManager.createQuery(
+            "SELECT COUNT(p) FROM Product p",
+            Long.class
+        );
+        return q.getSingleResult();
     }
 }

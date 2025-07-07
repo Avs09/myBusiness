@@ -1,10 +1,10 @@
-// src/main/java/com/myBusiness/adapters/outbound/persistence/CategoryRepositoryImpl.java
 package com.myBusiness.adapters.outbound.persistence;
 
 import com.myBusiness.domain.model.Category;
 import com.myBusiness.domain.port.CategoryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,13 +28,18 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public Optional<Category> findById(Long id) {
-        return Optional.ofNullable(em.find(Category.class, id));
+        Optional<Category> cat = Optional.ofNullable(em.find(Category.class, id));
+        // si quisieras inicializar relaciones, podrías usar JOIN FETCH en query
+        return cat;
     }
 
     @Override
     public List<Category> findAll() {
-        return em.createQuery("SELECT c FROM Category c", Category.class)
-                 .getResultList();
+        TypedQuery<Category> q = em.createQuery(
+            "SELECT c FROM Category c ORDER BY c.name",
+            Category.class
+        );
+        return q.getResultList();
     }
 
     @Override
