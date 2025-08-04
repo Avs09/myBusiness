@@ -121,12 +121,4 @@ Antes de iniciar, copia el ejemplo de variables de entorno y ajústalo. en la ra
 2. Verifica tu correo: encontrarás un código para activar la cuenta.
 3. Inicia sesión y accede al dashboard y al resto de funcionalidades.
 
-## Documentación de la API
 
-Integrada con **Springdoc OpenAPI**. Con el backend en marcha, visita:
-
-```
-http://localhost:8080/swagger-ui.html
-```
-
-Ahí encontrarás todos los endpoints, esquemas de datos y ejemplos.
