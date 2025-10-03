@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import axios from 'axios' // ya lo tienes, o puedes usar fetch desde alerts.ts si prefieres
 import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
 import { AlertCircle } from 'lucide-react'
+import { fetchUnreadAlerts } from '@/api/alerts'
 
 function AlertToast({ productName, alertType }: { productName: string; alertType: string }) {
   return (
@@ -39,8 +39,12 @@ export function useAlertPolling(intervalMs: number = 5000) {
               `}>
                 <AlertToast productName={alert.productName} alertType={alert.alertType} />
               </div>
-            ), { duration: 10000 })
+            ), { id: `alert-${id}`, duration: 3000 })
             seenIdsRef.current.add(id)
+            // Notificar a componentes interesados (Dashboard/Tablas) para recargar datos
+            try {
+              window.dispatchEvent(new CustomEvent('alerts:new', { detail: alert }))
+            } catch {}
           }
         })
       } catch (err) {

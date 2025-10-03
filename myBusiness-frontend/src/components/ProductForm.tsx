@@ -10,6 +10,7 @@ import Button from '@/components/ui/button'
 import Input from '@/components/ui/input'
 import Select from '@/components/ui/select'
 
+
 interface Option { id: number; name: string }
 
 interface ProductFormProps {
@@ -51,26 +52,56 @@ export default function ProductForm({
 
   const formValues = watch()
 
-  // Cargo categorías y unidades
+  // Cargo categorías y unidades (solo si no están ya cargadas)
   useEffect(() => {
-    fetchCategories(headers)
-      .then(data => {
-        setCategories(data)
-        if (data.length === 0) {
-          toast.error('Primero debes crear al menos una categoría')
-        }
-      })
-      .catch(() => toast.error('No se pudieron cargar categorías'))
+    // Flag para prevenir múltiples ejecuciones
+    if (categories.length === 0 && units.length === 0) {
+      console.log('🚀 ProductForm: Iniciando carga de datos...')
 
-    fetchUnits()
-      .then(data => {
-        setUnits(data)
-        if (data.length === 0) {
-          toast.error('Primero debes crear al menos una unidad')
+      // Usar una variable de control para evitar múltiples llamadas
+      let isLoading = false
+
+      const loadData = async () => {
+        if (isLoading) {
+          console.log('⏳ ProductForm: Ya se está cargando, omitiendo...')
+          return
         }
-      })
-      .catch(() => toast.error('No se pudieron cargar unidades'))
-  }, [])
+
+        isLoading = true
+
+
+        try {
+          const [categoriesData, unitsData] = await Promise.all([
+            fetchCategories(headers).catch(() => {
+              console.error('❌ ProductForm: Error cargando categorías')
+              return []
+            }),
+            fetchUnits().catch(() => {
+              console.error('❌ ProductForm: Error cargando unidades')
+              return []
+            })
+          ])
+
+          console.log('✅ ProductForm: Datos obtenidos:', { categories: categoriesData.length, units: unitsData.length })
+
+          // Usar callback para asegurar que se ejecute después del setState
+          setCategories(categoriesData)
+          setUnits(unitsData)
+
+
+        } catch (error) {
+          console.error('❌ ProductForm: Error general:', error)
+          toast.error('Error al cargar categorías y unidades')
+        } finally {
+          isLoading = false
+        }
+      }
+
+      loadData()
+    } else {
+      console.log('⏭️ ProductForm: Datos ya disponibles, no se requieren llamadas API')
+    }
+  }, []) // Remover dependencias para evitar re-ejecuciones
 
   // Si cambian los datos iniciales, reseteo todo
   useEffect(() => {
@@ -226,10 +257,21 @@ export default function ProductForm({
             />
             {errors.unitId && <p className="text-red-600 text-xs">{errors.unitId.message}</p>}
           </div>
+
           {(categories.length === 0 || units.length === 0) && (
-            <p className="text-red-600 text-sm">
-              Debes crear primero una categoría y una unidad antes de registrar un producto.
-            </p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+              <p className="text-yellow-800 text-sm font-medium">
+                ⚠️ Dependencias requeridas
+              </p>
+              <p className="text-yellow-700 text-sm mt-1">
+                {categories.length === 0 && units.length === 0
+                  ? "Para crear productos necesitas crear al menos una categoría y una unidad de medida."
+                  : categories.length === 0
+                    ? "Necesitas crear al menos una categoría antes de continuar."
+                    : "Necesitas crear al menos una unidad de medida antes de continuar."
+                }
+              </p>
+            </div>
           )}
         </div>
       )}

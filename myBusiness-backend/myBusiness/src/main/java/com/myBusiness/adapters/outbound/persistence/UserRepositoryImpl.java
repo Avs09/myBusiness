@@ -26,12 +26,17 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(em.find(User.class, id));
+    }
+
+    @Override
     public Optional<User> findByEmail(String email) {
         TypedQuery<User> q = em.createQuery(
             "SELECT u FROM User u WHERE u.username = :email",
             User.class);
         q.setParameter("email", email);
-        
+
         var results = q.getResultList();
         if (results.isEmpty()) {
             return Optional.empty();

@@ -11,6 +11,7 @@ import { createMovement, updateMovement } from '@/api/movements';
 import { fetchProductById, fetchAllProducts } from '@/api/products';
 import type { ProductOutput } from '@/api/products';
 import { useAuth } from '@/hooks/useAuth';
+import { formatCOP } from '@/utils/currency';
 
 interface MovementFormProps {
   initialData?: MovementOutputDto;
@@ -129,7 +130,7 @@ export default function MovementForm({ initialData, onSaved, onCancel }: Movemen
       toast.error('Cantidad debe ser mayor que cero');
       return;
     }
-
+ 
     if (watchType === 'EXIT' && stockBefore != null && vals.quantity > stockBefore) {
       toast.error(`Stock insuficiente (disponible ${stockBefore})`);
       return;
@@ -149,6 +150,10 @@ export default function MovementForm({ initialData, onSaved, onCancel }: Movemen
         saved = await createMovement(dto);
       }
       toast.success(isEdit ? 'Movimiento actualizado' : 'Movimiento registrado');
+      // Disparar evento global para refrescar tablas de alertas críticas/abiertas inmediatamente
+      try {
+        window.dispatchEvent(new CustomEvent('alerts:new', { detail: { movementId: saved.id } }));
+      } catch {}
       onSaved(saved);
     } catch (err: any) {
       console.error('Error guardando movimiento:', err);
@@ -190,7 +195,7 @@ export default function MovementForm({ initialData, onSaved, onCancel }: Movemen
         <div className="bg-gray-50 p-2 rounded space-y-1">
           <p className="text-sm font-medium">Detalle del producto:</p>
           <p className="text-sm">Nombre: {productDetail.name}</p>
-          <p className="text-sm">Precio unitario: {productDetail.price}</p>
+          <p className="text-sm">Precio unitario: {formatCOP(productDetail.price)}</p>
           {'thresholdMin' in productDetail && (
             <p className="text-sm">Umbral Mínimo: {(productDetail as any).thresholdMin}</p>
           )}

@@ -30,6 +30,19 @@ import ProductForm from '@/components/ProductForm'
 import ProductFilters, { ProductFilters as ProductFiltersType } from '@/components/ProductFilters'
 import CategoryForm from '@/components/CategoryForm'
 import UnitForm from '@/components/UnitForm'
+import { formatCOP } from '@/utils/currency'
+
+// Tipos de filas aceptadas para importación (por ID o por nombre)
+type ImportRow = {
+  name?: string
+  price?: number
+  thresholdMin?: number
+  thresholdMax?: number
+  categoryId?: number | null
+  unitId?: number | null
+  categoryName?: string | null
+  unitName?: string | null
+}
 
 export default function Products() {
   const { getAuthHeader } = useAuth()
@@ -48,7 +61,7 @@ export default function Products() {
   const [showUnitModal, setShowUnitModal] = useState(false)
 
   // importación
-  const [previewData, setPreviewData] = useState<ProductInput[]>([])
+  const [previewData, setPreviewData] = useState<ImportRow[]>([])
   const [errorsData, setErrorsData] = useState<{ row: number; errors: string[] }[]>([])
   const [showImportModal, setShowImportModal] = useState(false)
 
@@ -141,40 +154,164 @@ export default function Products() {
     e.target.value = ''
   }
 
-  const buildPreview = (data: ProductInput[]) => {
-    const preview: ProductInput[] = []
+  const buildPreview = (data: any[]) => {
+    const preview: ImportRow[] = []
     const rowErrors: typeof errorsData = []
-    data.forEach((row, idx) => {
+
+    data.forEach((raw, idx) => {
       const errs: string[] = []
-      if (!row.name) errs.push('Falta nombre')
-      if (isNaN(row.price) || row.price <= 0) errs.push('Precio inválido')
-      if (isNaN(row.thresholdMin) || row.thresholdMin < 0) errs.push('UmbralMin inválido')
-      if (isNaN(row.thresholdMax) || row.thresholdMax < row.thresholdMin) errs.push('UmbralMax inválido')
-      if (!row.categoryId) errs.push('Categoría inválida')
-      if (!row.unitId) errs.push('Unidad inválida')
+
+      const name = (raw?.name ?? '').toString().trim()
+      const price = Number(raw?.price)
+      const thresholdMin = Number(raw?.thresholdMin)
+      const thresholdMax = Number(raw?.thresholdMax)
+
+      // Aceptar referencia de categoría/unidad por ID o por nombre
+      const categoryIdParsed =
+        raw?.categoryId !== undefined && raw?.categoryId !== ''
+          ? Number(raw?.categoryId)
+          : undefined
+      const unitIdParsed =
+        raw?.unitId !== undefined && raw?.unitId !== ''
+          ? Number(raw?.unitId)
+          : undefined
+
+      const categoryNameParsed =
+        raw?.categoryName !== undefined && raw?.categoryName !== null
+          ? String(raw?.categoryName).trim()
+          : undefined
+      const unitNameParsed =
+        raw?.unitName !== undefined && raw?.unitName !== null
+          ? String(raw?.unitName).trim()
+          : undefined
+
+      // Validaciones mínimas (permitimos auto-creación por nombre)
+      if (!name) errs.push('Falta nombre')
+      if (isNaN(price) || price <= 0) errs.push('Precio inválido')
+      if (isNaN(thresholdMin) || thresholdMin < 0) errs.push('UmbralMin inválido')
+      if (isNaN(thresholdMax) || thresholdMax < thresholdMin) errs.push('UmbralMax inválido')
+
+      // Debe venir al menos categoryId o categoryName
+      if ((categoryIdParsed == null || isNaN(categoryIdParsed)) && !categoryNameParsed) {
+        errs.push('Categoría no especificada')
+      }
+      // Debe venir al menos unitId o unitName
+      if ((unitIdParsed == null || isNaN(unitIdParsed)) && !unitNameParsed) {
+        errs.push('Unidad no especificada')
+      }
+
       if (errs.length) rowErrors.push({ row: idx + 2, errors: errs })
-      preview.push(row)
+
+      preview.push({
+        name,
+        price,
+        thresholdMin,
+        thresholdMax,
+        categoryId: categoryIdParsed ?? null,
+        unitId: unitIdParsed ?? null,
+        categoryName: categoryNameParsed ?? null,
+        unitName: unitNameParsed ?? null
+      })
     })
+
     setPreviewData(preview)
     setErrorsData(rowErrors)
     setShowImportModal(true)
   }
 
   const confirmImport = async () => {
-    const headers = getAuthHeader() as Record<string,string>
-    let success = 0, fail = 0
-    for (let i = 0; i < previewData.length; i++) {
-      if (errorsData.some(e => e.row === i + 2)) { fail++; continue }
-      try {
-        await createProduct(previewData[i])
-        success++
-      } catch {
-        fail++
+    const headers = getAuthHeader() as Record<string, string>
+
+    try {
+      // 1) Cargar cat/units existentes
+      const existingCategories = await fetchCategories(headers).catch(() => []) as { id: number; name: string }[]
+      const existingUnits = await fetchUnits().catch(() => []) as { id: number; name: string }[]
+
+      const catByName = new Map<string, number>()
+      const unitByName = new Map<string, number>()
+
+      existingCategories.forEach(c => catByName.set(c.name.trim().toLowerCase(), c.id))
+      existingUnits.forEach(u => unitByName.set(u.name.trim().toLowerCase(), u.id))
+
+      // 2) Detectar nombres nuevos a crear
+      const newCategoryNames = new Set<string>()
+      const newUnitNames = new Set<string>()
+
+      for (const r of previewData) {
+        if (!r.categoryId && r.categoryName) {
+          const key = r.categoryName.trim().toLowerCase()
+          if (key && !catByName.has(key)) newCategoryNames.add(r.categoryName.trim())
+        }
+        if (!r.unitId && r.unitName) {
+          const key = r.unitName.trim().toLowerCase()
+          if (key && !unitByName.has(key)) newUnitNames.add(r.unitName.trim())
+        }
       }
+
+      // 3) Crear categorías nuevas
+      for (const name of newCategoryNames) {
+        try {
+          const created = await createCategory({ name }, headers)
+          catByName.set(created.name.trim().toLowerCase(), created.id)
+        } catch (e) {
+          console.error('No se pudo crear categoría', name, e)
+        }
+      }
+
+      // 4) Crear unidades nuevas
+      for (const name of newUnitNames) {
+        try {
+          const created = await createUnit({ name })
+          unitByName.set(created.name.trim().toLowerCase(), created.id)
+        } catch (e) {
+          console.error('No se pudo crear unidad', name, e)
+        }
+      }
+
+      // 5) Importar productos con IDs definitivos
+      let success = 0, fail = 0
+      for (let i = 0; i < previewData.length; i++) {
+        // si fila tiene errores de validación, omitir
+        if (errorsData.some(e => e.row === i + 2)) { fail++; continue }
+
+        const r = previewData[i]
+        const resolvedCategoryId =
+          r.categoryId ??
+          (r.categoryName ? catByName.get(r.categoryName.trim().toLowerCase()) : undefined)
+        const resolvedUnitId =
+          r.unitId ??
+          (r.unitName ? unitByName.get(r.unitName.trim().toLowerCase()) : undefined)
+
+        if (!resolvedCategoryId || !resolvedUnitId) {
+          fail++
+          continue
+        }
+
+        const dto: ProductInput = {
+          name: r.name!,
+          price: r.price!,
+          thresholdMin: r.thresholdMin!,
+          thresholdMax: r.thresholdMax!,
+          categoryId: resolvedCategoryId,
+          unitId: resolvedUnitId
+        }
+
+        try {
+          await createProduct(dto)
+          success++
+        } catch (e) {
+          console.error('No se pudo crear producto:', dto?.name, e)
+          fail++
+        }
+      }
+
+      toast.success(`Importados: ${success}, Fallidos: ${fail}`)
+      setShowImportModal(false)
+      loadPage(pageInfo.pageNumber)
+    } catch (e) {
+      console.error('Error general importando:', e)
+      toast.error('Error general durante la importación')
     }
-    toast.success(`Importados: ${success}, Fallidos: ${fail}`)
-    setShowImportModal(false)
-    loadPage(pageInfo.pageNumber)
   }
 
   // Exportar Excel
@@ -233,7 +370,7 @@ export default function Products() {
                 <td className="p-2 border">{p.name}</td>
                 <td className="p-2 border">{p.categoryName}</td>
                 <td className="p-2 border">{p.unitName}</td>
-                <td className="p-2 border">{p.price}</td>
+                <td className="p-2 border">{formatCOP(Number(p.price))}</td>
                 <td className="p-2 border space-x-1">
                   <Button size="sm" onClick={() => { setEditingProduct(p); setShowProductModal(true) }}>Editar</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(p.id)}>Eliminar</Button>
@@ -292,8 +429,8 @@ export default function Products() {
                   <th className="border px-2">Fila</th>
                   <th className="border px-2">Nombre</th>
                   <th className="border px-2">Precio</th>
-                  <th className="border px-2">CatId</th>
-                  <th className="border px-2">UnitId</th>
+                  <th className="border px-2">Categoría</th>
+                  <th className="border px-2">Unidad</th>
                 </tr>
               </thead>
               <tbody>
@@ -302,8 +439,8 @@ export default function Products() {
                     <td className="border px-2">{i+2}</td>
                     <td className="border px-2">{r.name}</td>
                     <td className="border px-2">{r.price}</td>
-                    <td className="border px-2">{r.categoryId}</td>
-                    <td className="border px-2">{r.unitId}</td>
+                    <td className="border px-2">{r.categoryName ?? r.categoryId}</td>
+                    <td className="border px-2">{r.unitName ?? r.unitId}</td>
                   </tr>
                 ))}
               </tbody>

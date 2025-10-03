@@ -1,0 +1,7 @@
+name,price,thresholdMin,thresholdMax,categoryName,unitName
+Café molido 500g,12000,5,50,Bebidas,Unidad
+Azúcar 1kg,3500,5,80,Abarrotes,Kilogramo
+Leche entera 1L,4200,10,120,Lácteos,Litro
+Arroz 1kg,4500,10,200,Abarrotes,Kilogramo
+Detergente 500g,7800,2,40,Aseo,Unidad
+Aceite vegetal 1L,9800,5,60,Abarrotes,Litro

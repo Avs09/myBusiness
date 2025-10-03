@@ -4,6 +4,8 @@ package com.myBusiness.infrastructure.security;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
+import com.myBusiness.domain.model.User;
+import com.myBusiness.domain.port.UserRepository;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.*;
@@ -18,11 +20,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil,
-                                   UserDetailsService userDetailsService) {
+                                    UserDetailsService userDetailsService,
+                                    UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -42,11 +47,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (username != null &&
             SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails user = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if (jwtUtil.validateToken(token)) {
+                // Get the user entity to access the ID
+                User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
                 UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
-                        user, null, user.getAuthorities());
+                        user.getId(), null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }

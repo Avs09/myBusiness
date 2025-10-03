@@ -9,6 +9,7 @@ import Reports from '@/pages/Reports'
 import Dashboard from '@/pages/Dashboard'
 import Movements from '@/pages/Movements'
 import AlertsPage from '@/pages/AlertsPage'
+import Profile from '@/pages/Profile'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import PublicLayout from '@/layouts/PublicLayout'
 import PrivateLayout from '@/layouts/PrivateLayout'
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="movements" element={<Movements />} />
           <Route path="alerts" element={<AlertsPage />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

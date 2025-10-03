@@ -1,6 +1,7 @@
 package com.myBusiness.adapters.inbound.rest;
 
 import com.myBusiness.application.dto.EmailDto;
+import com.myBusiness.application.dto.UserProfileDto;
 import com.myBusiness.application.dto.UserRegisterDto;
 import com.myBusiness.application.dto.VerifyCodeDto;
 import com.myBusiness.application.exception.InvalidCodeException;
@@ -8,10 +9,15 @@ import com.myBusiness.application.exception.InvalidUserException;
 import com.myBusiness.application.exception.TokenExpiredException;
 import com.myBusiness.application.usecase.RegisterUserUseCase;
 import com.myBusiness.application.usecase.SendVerificationCodeUseCase;
+import com.myBusiness.application.usecase.UpdateUserProfileUseCase;
 import com.myBusiness.application.usecase.VerifyEmailCodeUseCase;
+import com.myBusiness.domain.model.User;
+import com.myBusiness.domain.port.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +33,13 @@ public class UserController {
     private final RegisterUserUseCase registerUserUseCase;
     private final SendVerificationCodeUseCase sendCodeUseCase;
     private final VerifyEmailCodeUseCase verifyCodeUseCase;
+    private final UpdateUserProfileUseCase updateUserProfileUseCase;
+    private final UserRepository userRepository;
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (Long) authentication.getPrincipal();
+    }
 
     /**
      * 1) Registrar usuario -> POST /api/users/register
@@ -100,6 +113,48 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Error verificando correo: " + ex.getMessage()));
+        }
+    }
+
+    /**
+     * 3) Obtener perfil de usuario.
+     *    GET /api/users/profile
+     */
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDto> getProfile() {
+        try {
+            Long userId = getCurrentUserId();
+            User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            UserProfileDto profileDto = new UserProfileDto();
+            profileDto.setName(user.getName());
+            profileDto.setPhone(user.getPhone());
+            profileDto.setLocation(user.getLocation());
+            profileDto.setBio(user.getBio());
+
+            return ResponseEntity.ok(profileDto);
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
+
+    /**
+     * 4) Actualizar perfil de usuario.
+     *    PUT /api/users/profile
+     */
+    @PutMapping("/profile")
+    public ResponseEntity<Map<String, String>> updateProfile(@RequestBody @Valid UserProfileDto profileDto) {
+        try {
+            Long userId = getCurrentUserId();
+            updateUserProfileUseCase.execute(userId, profileDto);
+            return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error actualizando perfil: " + ex.getMessage()));
         }
     }
 }

@@ -5,9 +5,11 @@ import com.myBusiness.application.dto.CategorySummaryDto;
 import com.myBusiness.application.dto.InventoryReportRowDto;
 import com.myBusiness.application.dto.ReportFilterDto;
 import com.myBusiness.application.dto.ReportSummaryDto;
+import com.myBusiness.application.dto.ScheduleDto;
 import com.myBusiness.application.usecase.GenerateInventoryReportUseCase;
 import com.myBusiness.application.usecase.GetCategorySummaryUseCase;
 import com.myBusiness.application.usecase.GetReportSummaryUseCase;
+import com.myBusiness.application.usecase.ScheduleReportUseCase;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -24,6 +26,7 @@ public class ReportController {
     private final GenerateInventoryReportUseCase reportUseCase;
     private final GetCategorySummaryUseCase categorySummaryUseCase;
     private final GetReportSummaryUseCase reportSummaryUseCase;
+    private final ScheduleReportUseCase scheduleReportUseCase;
 
     @GetMapping("/inventory")
     public ResponseEntity<List<InventoryReportRowDto>> getInventoryReport(ReportFilterDto filter) {
@@ -66,5 +69,15 @@ public class ReportController {
     public ResponseEntity<ReportSummaryDto> getReportSummary(ReportFilterDto filter) {
         ReportSummaryDto dto = reportSummaryUseCase.execute(filter);
         return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * 5) Programar envío periódico de reportes.
+     *    POST /api/reports/schedule
+     */
+    @PostMapping("/schedule")
+    public ResponseEntity<Void> scheduleReport(@RequestBody ScheduleDto scheduleDto) {
+        scheduleReportUseCase.execute(scheduleDto);
+        return ResponseEntity.ok().build();
     }
 }

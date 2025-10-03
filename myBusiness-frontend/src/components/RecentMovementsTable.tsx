@@ -40,7 +40,6 @@ export default function RecentMovementsTable() {
               <th className="p-2 border text-left">Cantidad</th>{/* */}
               <th className="p-2 border text-left">Motivo</th>{/* */}
               <th className="p-2 border text-left">Fecha</th>{/* */}
-              <th className="p-2 border text-left">Usuario</th>{/* */}
             </tr>
           </thead>
           <tbody>
@@ -48,13 +47,20 @@ export default function RecentMovementsTable() {
               <tr key={m.id} className="hover:bg-gray-50">{/* evita whitespace */}
                 {/* */}<td className="p-2 border">{m.id}</td>{/* */}
                 <td className="p-2 border">{m.productName}</td>{/* */}
-                <td className="p-2 border">{m.movementType}</td>{/* */}
+                <td className="p-2 border">
+                  {String(m.movementType || '').toUpperCase() === 'ENTRY'
+                    ? 'Entrada'
+                    : String(m.movementType || '').toUpperCase() === 'EXIT'
+                      ? 'Salida'
+                      : String(m.movementType || '').toUpperCase() === 'ADJUSTMENT'
+                        ? 'Ajuste'
+                        : m.movementType}
+                </td>{/* */}
                 <td className="p-2 border">{m.quantity}</td>{/* */}
                 <td className="p-2 border">{m.reason}</td>{/* */}
                 <td className="p-2 border">
                   {new Date(m.movementDate).toLocaleString()}
                 </td>{/* */}
-                <td className="p-2 border">{m.createdBy}</td>{/* */}
               </tr>
             ))}
           </tbody>

@@ -67,3 +67,13 @@ export async function markAlertRead(
     { headers }
   )
 }
+
+export async function fetchUnreadAlerts(
+  headers: Record<string, string>
+): Promise<AlertOutputDto[]> {
+  const resp = await axios.get<AlertOutputDto[]>(
+    `${API_BASE}/alerts/unread`,
+    { headers }
+  )
+  return resp.data
+}

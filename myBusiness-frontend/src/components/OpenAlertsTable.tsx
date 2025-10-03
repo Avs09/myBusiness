@@ -24,6 +24,11 @@ export default function OpenAlertsTable() {
 
   useEffect(() => {
     loadAlerts()
+    const onNewAlert = (_e: Event) => loadAlerts()
+    window.addEventListener('alerts:new', onNewAlert as EventListener)
+    return () => {
+      window.removeEventListener('alerts:new', onNewAlert as EventListener)
+    }
   }, [])
 
   if (loading) {

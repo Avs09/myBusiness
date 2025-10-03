@@ -117,6 +117,10 @@ export default function Movements() {
       {
         accessorKey: 'movementType',
         header: 'Tipo',
+        cell: ({ getValue }) => {
+          const v = String(getValue() || '').toUpperCase()
+          return v === 'ENTRY' ? 'Entrada' : v === 'EXIT' ? 'Salida' : v === 'ADJUSTMENT' ? 'Ajuste' : v
+        },
       },
       {
         accessorKey: 'quantity',
@@ -130,10 +134,6 @@ export default function Movements() {
         accessorKey: 'movementDate',
         header: 'Fecha',
         cell: ({ getValue }) => new Date(getValue<string>()).toLocaleString(),
-      },
-      {
-        accessorKey: 'createdBy',
-        header: 'Usuario',
       },
       {
         id: 'actions',

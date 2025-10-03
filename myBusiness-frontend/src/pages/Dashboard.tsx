@@ -10,6 +10,8 @@ import {
   fetchMovementsLast24hCount,
 } from '@/api/movements'
 
+import { getBusiness } from '@/api/business'
+
 import KpiTile from '@/components/KpiTile'
 import OpenAlertsTable from '@/components/OpenAlertsTable'
 import RecentMovementsTable from '@/components/RecentMovementsTable'
@@ -19,6 +21,8 @@ import StockEvolutionChart from '@/components/StockEvolutionChart'
 import TopProductsList from '@/components/TopProductsList'
 import CriticalStockAlertsTable from '@/components/CriticalStockAlertsTable'
 import CategorySummaryCards from '@/components/CategorySummaryCards'
+import BusinessSetup from '@/components/BusinessSetup'
+import { formatCOP } from '@/utils/currency'
 
 import {
   Box as BoxIcon,
@@ -32,40 +36,71 @@ export default function Dashboard() {
 
   const [metrics, setMetrics] = useState<DashboardMetricsDto | null>(null)
   const [loading, setLoading] = useState(true)
+  const [hasBusiness, setHasBusiness] = useState<boolean | null>(null)
+  const [businessCheckLoading, setBusinessCheckLoading] = useState(true)
 
   const [mov24h, setMov24h] = useState<number | null>(null)
   const [loading24h, setLoading24h] = useState(true)
 
   useEffect(() => {
-    const rawHeaders = getAuthHeader()
-    const headers = rawHeaders as Record<string, string>
+    // First check if user has a business configured
+    const checkBusiness = async () => {
+      setBusinessCheckLoading(true)
+      try {
+        await getBusiness()
+        setHasBusiness(true)
+      } catch (error) {
+        setHasBusiness(false)
+      } finally {
+        setBusinessCheckLoading(false)
+      }
+    }
 
-    setLoading(true)
-    fetchDashboardMetrics()
-      .then((data) => {
-        setMetrics(data)
-      })
-      .catch((err: any) => {
-        console.error('Error cargando métricas:', err)
-        toast.error(err.response?.data?.message || 'No se pudieron cargar métricas.')
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-
-    setLoading24h(true)
-    fetchMovementsLast24hCount()
-      .then((count) => {
-        setMov24h(count)
-      })
-      .catch((err) => {
-        console.error('Error calculando mov 24h:', err)
-        toast.error('No se pudo calcular movimientos últimas 24h')
-        setMov24h(null)
-      })
-      .finally(() => setLoading24h(false))
-    
+    checkBusiness()
   }, [])
+
+  useEffect(() => {
+    // Only load dashboard data if user has a business
+    if (hasBusiness === true) {
+      const rawHeaders = getAuthHeader()
+      const headers = rawHeaders as Record<string, string>
+
+      setLoading(true)
+      fetchDashboardMetrics()
+        .then((data) => {
+          setMetrics(data)
+        })
+        .catch((err: any) => {
+          console.error('Error cargando métricas:', err)
+          toast.error(err.response?.data?.message || 'No se pudieron cargar métricas.')
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+
+      setLoading24h(true)
+      fetchMovementsLast24hCount()
+        .then((count) => {
+          setMov24h(count)
+        })
+        .catch((err) => {
+          console.error('Error calculando mov 24h:', err)
+          toast.error('No se pudo calcular movimientos últimas 24h')
+          setMov24h(null)
+        })
+        .finally(() => setLoading24h(false))
+    }
+  }, [hasBusiness])
+
+  // Show loading while checking business status
+  if (businessCheckLoading) {
+    return <p className="text-center mt-8">Cargando...</p>
+  }
+
+  // Show business setup if user doesn't have a business
+  if (hasBusiness === false) {
+    return <BusinessSetup onComplete={() => setHasBusiness(true)} />
+  }
 
   if (loading) {
     return <p className="text-center mt-8">Cargando dashboard...</p>
@@ -78,16 +113,8 @@ export default function Dashboard() {
     )
   }
 
-  // Formatear valor total inventario como COP
-  const formatoCOP = (valueStr: string) => {
-    let num = Number(valueStr)
-    if (isNaN(num)) return valueStr
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
-    }).format(num)
-  }
+  // Formatear valor total inventario como COP (utilidad común)
+  const formatoCOP = (valueStr: string) => formatCOP(valueStr, { maximumFractionDigits: 0 })
 
   return (
     <div className="p-6 space-y-6">

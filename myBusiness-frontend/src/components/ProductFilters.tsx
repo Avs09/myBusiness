@@ -23,23 +23,52 @@ export default function ProductFilters({ filters, onChange }: ProductFiltersProp
   const [units, setUnits] = useState<{ id: number; name: string }[]>([])
 
   useEffect(() => {
-    
-    const headers = getAuthHeader() as Record<string, string>
+   // Solo cargar si no tenemos datos ya cargados
+   if (categories.length === 0 && units.length === 0) {
+     console.log('🚀 ProductFilters: Iniciando carga de datos...')
 
-    fetchCategories(headers)
-      .then(setCategories)
-      .catch(err => {
-        console.error('Error cargando categorías:', err)
-        toast.error('No se pudieron cargar categorías')
-      })
+     // Flag para prevenir múltiples ejecuciones
+     let isLoading = false
 
-    fetchUnits()
-      .then(setUnits)
-      .catch(err => {
-        console.error('Error cargando unidades:', err)
-        toast.error('No se pudieron cargar unidades')
-      })
-  }, [getAuthHeader])
+     const loadData = async () => {
+       if (isLoading) {
+         console.log('⏳ ProductFilters: Ya se está cargando, omitiendo...')
+         return
+       }
+
+       isLoading = true
+       const headers = getAuthHeader() as Record<string, string>
+
+       try {
+         const [categoriesData, unitsData] = await Promise.all([
+           fetchCategories(headers).catch(() => {
+             console.error('❌ ProductFilters: Error cargando categorías')
+             return []
+           }),
+           fetchUnits().catch(() => {
+             console.error('❌ ProductFilters: Error cargando unidades')
+             return []
+           })
+         ])
+
+         console.log('✅ ProductFilters: Datos obtenidos:', { categories: categoriesData.length, units: unitsData.length })
+
+         // Usar callback para asegurar actualización correcta del estado
+         setCategories(categoriesData)
+         setUnits(unitsData)
+
+       } catch (error) {
+         console.error('❌ ProductFilters: Error general:', error)
+       } finally {
+         isLoading = false
+       }
+     }
+
+     loadData()
+   } else {
+     console.log('⏭️ ProductFilters: Datos ya disponibles, no se requieren llamadas API')
+   }
+ }, []) // Remover dependencias para evitar re-ejecuciones
 
   const update = (partial: Partial<ProductFilters>) => {
     onChange({ ...filters, ...partial })

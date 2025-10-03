@@ -14,7 +14,8 @@ import Button from '@/components/ui/button'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
+import { saveAs } from 'file-saver'
 import { useForm } from 'react-hook-form'
 import KpiTile from '@/components/KpiTile'
 import {
@@ -22,6 +23,7 @@ import {
   DollarSign as DollarIcon,
   TrendingUp as TrendIcon,
 } from 'lucide-react'
+import { formatCOP } from '@/utils/currency'
 import {
   LineChart,
   Line,
@@ -40,6 +42,7 @@ import {
   getInventorySnapshot,
   scheduleReport,
 } from '@/api/report'
+import { getBusiness } from '@/api/business'
 import {
   fetchStockEvolution,
   StockEvolutionDto,
@@ -57,6 +60,7 @@ import type {
   ScheduleDto,
 } from '@/schemas/report'
 import Modal from '@/components/ui/modal'
+import InvoicePreview from '@/components/reports/InvoicePreview'
 
 interface PageInfo {
   pageIndex: number
@@ -91,8 +95,14 @@ export default function Reports() {
   // KPIs resumen
   const [summary, setSummary] = useState<ReportSummaryDto | null>(null)
 
-  // Export menu
-  const [exportMenuOpen, setExportMenuOpen] = useState(false)
+  // Invoice preview modal
+  const [showInvoicePreview, setShowInvoicePreview] = useState(false)
+  const [fullData, setFullData] = useState<InventoryReportRowDto[]>([])
+  const [loadingPreview, setLoadingPreview] = useState(false)
+
+  // Business information for invoice
+  const [businessInfo, setBusinessInfo] = useState<any>(null)
+  const [exportingPDF, setExportingPDF] = useState(false)
 
   // Programar reporte
   const [showScheduleModal, setShowScheduleModal] = useState(false)
@@ -203,56 +213,167 @@ export default function Reports() {
     }
   }
 
-  // 5) Exportaciones
-  const exportCSV = () => {
-    const csv = Papa.unparse(data)
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'reporte-inventario.csv'
-    a.click()
-    URL.revokeObjectURL(url)
-    setExportMenuOpen(false)
-  }
-  const exportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(data)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Reporte')
-    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' })
-    const blob = new Blob([buf], { type: 'application/octet-stream' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'reporte-inventario.xlsx'
-    a.click()
-    URL.revokeObjectURL(url)
-    setExportMenuOpen(false)
-  }
-  const exportPDF = () => {
-    const doc = new jsPDF()
-    doc.text('Reporte de Inventario', 14, 16)
-    const head = [columns.map((col) => String(col.header))]
-    const body = data.map((row) => [
-      row.productName,
-      row.categoryName,
-      row.unitName,
-      String(row.currentStock),
-      new Date(row.lastMovementDate).toLocaleString(),
-    ])
-    ;(doc as any).autoTable({
-      startY: 20,
-      head,
-      body,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [41, 128, 185] },
-    })
-    doc.save('reporte-inventario.pdf')
-    setExportMenuOpen(false)
-  }
-  const handlePrint = () => {
-    window.print()
-    setExportMenuOpen(false)
+  // Export PDF (from preview modal)
+  const exportPDF = async () => {
+    setExportingPDF(true)
+    try {
+      console.log('Iniciando exportación PDF...')
+      const doc = new jsPDF('p', 'pt', 'a4')
+
+      // Helpers
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const marginX = 40
+      const lineGap = 16
+
+      const loadLogo = async (src: string) => {
+        try {
+          const res = await fetch(src)
+          const blob = await res.blob()
+          return await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(String(reader.result))
+            reader.readAsDataURL(blob)
+          })
+        } catch {
+          return ''
+        }
+      }
+
+      let cursorY = 40
+
+      // Header (logo + título + fecha)
+      let logoDataUrl = null
+      if (businessInfo?.logoUrl) {
+        logoDataUrl = await loadLogo(businessInfo.logoUrl)
+      }
+      if (!logoDataUrl) {
+        // Fallback to default logo
+        logoDataUrl = await loadLogo('/logo.png')
+      }
+      if (logoDataUrl) {
+        const imgW = 100
+        const imgH = 32
+        doc.addImage(logoDataUrl, 'PNG', marginX, cursorY, imgW, imgH)
+      }
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      const title = 'Factura de Inventario'
+      const titleW = doc.getTextWidth(title)
+      doc.text(title, pageWidth - marginX - titleW, cursorY + 18)
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      const now = new Date()
+      const fecha = now.toLocaleString()
+      doc.text(`Fecha: ${fecha}`, pageWidth - marginX - doc.getTextWidth(`Fecha: ${fecha}`), cursorY + 36)
+
+      cursorY += 52
+
+      // Datos de emisor y destinatario (opcionales: empresa y usuario)
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Emisor:', marginX, cursorY)
+      doc.setFont('helvetica', 'normal')
+      doc.text('MyBusiness', marginX, cursorY + lineGap)
+      doc.text('https://mybusiness.local', marginX, cursorY + lineGap * 2)
+
+      doc.setFont('helvetica', 'bold')
+      doc.text('Generado para:', pageWidth / 2, cursorY)
+      doc.setFont('helvetica', 'normal')
+
+      // Mostrar información del negocio y usuario de manera profesional
+      const generatedFor = []
+
+      // Agregar nombre del negocio (siempre obligatorio)
+      if (businessInfo?.name) {
+        generatedFor.push(businessInfo.name)
+      }
+
+      // Agregar nombre del usuario si está definido
+      // Nota: Actualmente no tenemos nombres de usuario, pero preparado para cuando se implemente
+      // if (userName) {
+      //   generatedFor.push(userName)
+      // }
+
+      // Si no hay información específica, mostrar genérico
+      if (generatedFor.length === 0) {
+        generatedFor.push('Administrador del Sistema')
+        generatedFor.push('MyBusiness - Sistema de Inventario')
+      }
+
+      generatedFor.forEach((info, index) => {
+        doc.text(info, pageWidth / 2, cursorY + lineGap * (index + 1))
+      })
+
+      cursorY += lineGap * (generatedFor.length + 1) + 20
+
+      // Resumen (KPIs)
+      if (summary) {
+        doc.setFont('helvetica', 'bold')
+        doc.text('Resumen:', marginX, cursorY)
+        doc.setFont('helvetica', 'normal')
+        const resumen = [
+          `Total SKUs: ${summary.totalSkus}`,
+          `Valor total inventario: ${formatCOP(summary.totalValue)}`,
+          `Días de stock (estimación): ${summary.daysOfStock}`
+        ]
+        resumen.forEach((t, i) => {
+          doc.text(t, marginX, cursorY + lineGap * (i + 1))
+        })
+        cursorY += lineGap * (resumen.length + 1)
+      }
+
+      // Tabla de detalles (usar dataset completo ya cargado, limitado a 500 filas para evitar PDFs muy grandes)
+      const maxRows = 500
+      const dataToExport = fullData.slice(0, maxRows)
+      const head = [['Producto', 'Categoría', 'Unidad', 'Stock Actual', 'Último Movimiento']]
+      const body = dataToExport.map((row) => [
+        row.productName,
+        row.categoryName,
+        row.unitName,
+        String(row.currentStock ?? ''),
+        row.lastMovementDate ? new Date(row.lastMovementDate).toLocaleString() : ''
+      ])
+
+      console.log('Generando tabla con', body.length, 'filas (limitado a', maxRows, 'para evitar PDFs muy grandes)...')
+      autoTable(doc, {
+        startY: cursorY,
+        margin: { left: marginX, right: marginX },
+        head,
+        body,
+        styles: { fontSize: 9, cellPadding: 6 },
+        headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+        didDrawPage: (data: any) => {
+          // Footer con paginación
+          const pageCount = doc.getNumberOfPages()
+          const str = `Página ${data.pageNumber} de ${pageCount}`
+          doc.setFontSize(9)
+          doc.setTextColor(140)
+          doc.text(str, pageWidth - marginX - doc.getTextWidth(str), doc.internal.pageSize.getHeight() - 20)
+        }
+      })
+
+      // Totales al final (si hay)
+      if (summary) {
+        const finalY = (doc as any).lastAutoTable.finalY || cursorY + 20
+        doc.setFont('helvetica', 'bold')
+        doc.text('Totales:', marginX, finalY + 28)
+        doc.setFont('helvetica', 'normal')
+        doc.text(`Valor total inventario: ${formatCOP(summary.totalValue)}`, marginX, finalY + 28 + lineGap)
+        doc.text(`Total SKUs: ${summary.totalSkus}`, marginX, finalY + 28 + lineGap * 2)
+      }
+
+      console.log('Guardando PDF...')
+      const pdfBlob = doc.output('blob')
+      saveAs(pdfBlob, 'factura-inventario.pdf')
+      toast.success('PDF exportado correctamente')
+      setShowInvoicePreview(false)
+    } catch (err: any) {
+      console.error('Error exportando PDF:', err)
+      toast.error('Error generando PDF: ' + (err.message || 'Desconocido'))
+    } finally {
+      setExportingPDF(false)
+    }
   }
 
   // 6) Programar reporte
@@ -273,6 +394,17 @@ export default function Reports() {
     fetchSummary()
     fetchPage(0)
     fetchCharts()
+
+    // Fetch business information for invoice
+    const fetchBusinessInfo = async () => {
+      try {
+        const business = await getBusiness()
+        setBusinessInfo(business)
+      } catch (error) {
+        console.error('Error fetching business info:', error)
+      }
+    }
+    fetchBusinessInfo()
   }, [filters])
 
   // ------------- Render -------------
@@ -291,7 +423,7 @@ export default function Reports() {
           />
           <KpiTile
             label="Valor total inventario"
-            value={`$ ${summary.totalValue}`}
+            value={formatCOP(summary.totalValue)}
             icon={<DollarIcon />}
             colorBg="bg-green-50"
           />
@@ -309,37 +441,21 @@ export default function Reports() {
 
       {/* Export & Programar */}
       <div className="flex items-center space-x-2">
-        <div className="relative inline-block">
-          <Button onClick={() => setExportMenuOpen((o) => !o)}>Exportar ▾</Button>
-          {exportMenuOpen && (
-            <div className="absolute left-0 mt-2 w-40 bg-white border shadow-lg z-10">
-              <button
-                onClick={exportCSV}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                CSV
-              </button>
-              <button
-                onClick={exportExcel}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                Excel
-              </button>
-              <button
-                onClick={exportPDF}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                PDF
-              </button>
-              <button
-                onClick={handlePrint}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                Imprimir
-              </button>
-            </div>
-          )}
-        </div>
+        <Button onClick={async () => {
+          setLoadingPreview(true)
+          try {
+            const all = await getInventoryReport(filters)
+            setFullData(all)
+            setShowInvoicePreview(true)
+          } catch (err: any) {
+            console.error(err)
+            toast.error('Error cargando datos para previsualización')
+          } finally {
+            setLoadingPreview(false)
+          }
+        }} disabled={loadingPreview}>
+          {loadingPreview ? 'Cargando...' : 'Exportar'}
+        </Button>
         <Button variant="secondary" onClick={() => setShowScheduleModal(true)}>
           Programar Reporte
         </Button>
@@ -442,7 +558,7 @@ export default function Reports() {
                 <tr key={i} className="hover:bg-gray-50">
                   <td className="p-2 border">{s.date}</td>
                   <td className="p-2 border">{s.totalProducts}</td>
-                  <td className="p-2 border">${s.totalValue}</td>
+                  <td className="p-2 border">{formatCOP(s.totalValue)}</td>
                 </tr>
               ))}
             </tbody>
@@ -501,6 +617,20 @@ export default function Reports() {
         </div>
       </div>
 
+      {/* Modal Previsualización Factura */}
+      {showInvoicePreview && (
+        <Modal onClose={() => setShowInvoicePreview(false)} className="max-w-4xl">
+          <InvoicePreview summary={summary} rows={fullData} businessInfo={businessInfo} />
+          <div className="mt-4 flex justify-end space-x-2">
+            <Button variant="secondary" onClick={() => setShowInvoicePreview(false)}>
+              Cerrar
+            </Button>
+            <Button onClick={exportPDF} disabled={exportingPDF}>
+              {exportingPDF ? 'Exportando...' : 'Confirmar y Exportar PDF'}
+            </Button>
+          </div>
+        </Modal>
+      )}
       {/* Modal Programar Reporte */}
       {showScheduleModal && (
         <Modal onClose={() => setShowScheduleModal(false)}>

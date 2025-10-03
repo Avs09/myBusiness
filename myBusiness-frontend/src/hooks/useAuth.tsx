@@ -27,24 +27,27 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const [user, setUser] = useState<{ email: string } | null>(null);
 
-  useEffect(() => {
+  // Inicializar el usuario desde localStorage de forma SINCRÓNICA para evitar logout al refrescar
+  const initialUser: { email: string } | null = (() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(token);
-        if (decoded.exp * 1000 > Date.now()) {
-          setUser({ email: decoded.sub });
-        } else {
-          localStorage.removeItem('token');
-        }
-      } catch (err) {
-        console.error('Error al decodificar token:', err);
+    if (!token) return null;
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      if (decoded.exp * 1000 > Date.now()) {
+        return { email: decoded.sub };
+      } else {
         localStorage.removeItem('token');
+        return null;
       }
+    } catch (err) {
+      console.error('Error al decodificar token:', err);
+      localStorage.removeItem('token');
+      return null;
     }
-  }, []);
+  })();
+
+  const [user, setUser] = useState<{ email: string } | null>(initialUser);
 
   async function login({ email, password }: { email: string; password: string }) {
     const token = await loginApi({ email, password });

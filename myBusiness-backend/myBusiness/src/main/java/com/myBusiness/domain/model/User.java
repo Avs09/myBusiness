@@ -30,7 +30,16 @@ public class User {
     private String password;
 
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = false;   
+    private boolean enabled = false;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "location", length = 100)
+    private String location;
+
+    @Column(name = "bio", length = 500)
+    private String bio;
 
     @CreatedBy
     @Column(name = "created_by", updatable = false, length = 50)
